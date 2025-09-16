@@ -29,11 +29,22 @@
                 <textarea id="procedimentos" rows="5"></textarea>
 
                 <h2>Controle de Medicação</h2>
-                <div class="medication-input">
-                    <input type="text" id="remedio-nome" placeholder="Nome do remédio..." required>
-                    <input type="time" id="remedio-horario" required>
-                    <button type="button" id="btn-adicionar-remedio" class="btn-icon">Adicionar</button>
-                </div>
+                    <div class="medication-input-group">
+                        <select id="remedio-select">
+                            <option value="">Selecione um remédio...</option>
+                            <option value="Ibuprofeno">Ibuprofeno</option>
+                            <option value="Dipirona">Dipirona</option>
+                            <option value="Amoxicilina">Amoxicilina</option>
+                            <option value="Omeprazol">Omeprazol</option>
+                            <option value="Losartana">Losartana</option>
+                            <option value="Metformina">Metformina</option>
+                            <option value="Paracetamol">Paracetamol</option>
+                            <option value="outro">Outro...</option>
+                        </select>
+                <input type="text" id="remedio-nome-personalizado" placeholder="Digite o nome do remédio..." style="display: none;">
+                <input type="time" id="remedio-horario" required>
+                <button type="button" id="btn-adicionar-remedio" class="btn-icon">Adicionar</button>
+                    </div>
                 <ul id="lista-medicamentos"></ul>
                 
                 <div class="form-actions">

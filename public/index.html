@@ -19,6 +19,7 @@
             <h2>Dados do Paciente</h2>
             <form id="form-paciente">
                 <input type="hidden" id="paciente-id">
+                <input type="hidden" id="data-entrada">
                 <label for="nome">Nome:</label>
                 <input type="text" id="nome" required>
                 <label for="sobrenome">Sobrenome:</label>
@@ -30,24 +31,6 @@
                 <label for="endereco">Endereço:</label>
                 <textarea id="endereco"></textarea>
 
-                <h2>Informações de Baixa</h2>
-                <label for="data-baixa">Data de Baixa:</label>
-                <input type="date" id="data-baixa">
-                <label for="horario-baixa">Horário de Baixa:</label>
-                <div class="time-input-group">
-                    <div class="time-part">
-                        <button type="button" class="btn-time" id="btn-baixa-hour-up">+</button>
-                        <input type="text" id="baixa-hora" value="00" maxlength="2" readonly>
-                        <button type="button" class="btn-time" id="btn-baixa-hour-down">-</button>
-                    </div>
-                    <span>:</span>
-                    <div class="time-part">
-                        <button type="button" class="btn-time" id="btn-baixa-minute-up">+</button>
-                        <input type="text" id="baixa-minuto" value="00" maxlength="2" readonly>
-                        <button type="button" class="btn-time" id="btn-baixa-minute-down">-</button>
-                    </div>
-                </div>
-                
                 <h2>Procedimentos</h2>
                 <textarea id="procedimentos" rows="5"></textarea>
 
@@ -79,6 +62,10 @@
                         </div>
                     </div>
                     <button type="button" id="btn-adicionar-remedio" class="btn-icon">Adicionar</button>
+                    <div class="sn-check-group">
+                        <input type="checkbox" id="sn-checkbox">
+                        <label for="sn-checkbox">SN</label>
+                    </div>
                 </div>
                 <ul id="lista-medicamentos"></ul>
                 
@@ -87,6 +74,27 @@
                     <button type="button" id="btn-limpar">Limpar Formulário</button>
                 </div>
             </form>
+
+            <div id="alta-section" class="card" style="display:none;">
+                <h2>Dar Alta</h2>
+                <label for="data-alta">Data da Alta:</label>
+                <input type="date" id="data-alta">
+                <label for="horario-alta">Horário da Alta:</label>
+                <div class="time-input-group">
+                    <div class="time-part">
+                        <button type="button" class="btn-time" id="btn-alta-hour-up">+</button>
+                        <input type="text" id="alta-hora" value="00" maxlength="2" readonly>
+                        <button type="button" class="btn-time" id="btn-alta-hour-down">-</button>
+                    </div>
+                    <span>:</span>
+                    <div class="time-part">
+                        <button type="button" class="btn-time" id="btn-alta-minute-up">+</button>
+                        <input type="text" id="alta-minuto" value="00" maxlength="2" readonly>
+                        <button type="button" class="btn-time" id="btn-alta-minute-down">-</button>
+                    </div>
+                </div>
+                <button type="button" id="btn-dar-alta" class="btn-salvar">Dar Alta</button>
+            </div>
         </section>
 
         <section class="card lista-pacientes">

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Hospitalar</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Prontuário Eletrônico</h1>
+    </header>
+
+    <main class="container">
+        
+        <section class="card">
+            <h2>Dados do Paciente</h2>
+            <form id="form-paciente">
+                <input type="hidden" id="paciente-id">
+                <label for="nome">Nome:</label><input type="text" id="nome" required>
+                <label for="sobrenome">Sobrenome:</label><input type="text" id="sobrenome" required>
+                <label for="cpf">CPF:</label><input type="text" id="cpf" required>
+                <label for="data-nascimento">Nascimento:</label><input type="date" id="data-nascimento">
+                <label for="endereco">Endereço:</label><textarea id="endereco"></textarea>
+                
+                <h2>Procedimentos</h2>
+                <textarea id="procedimentos" rows="5"></textarea>
+
+                <h2>Checklist de Tarefas</h2>
+                <div class="checklist-input">
+                    <input type="text" id="novo-item" placeholder="Adicionar nova tarefa...">
+                    <button type="button" id="btn-adicionar" class="btn-icon">&#43;</button>
+                </div>
+                <ul id="lista-checklist"></ul>
+                
+                <div class="form-actions">
+                    <button type="submit" id="btn-salvar">Salvar Paciente</button>
+                    <button type="button" id="btn-limpar">Limpar Formulário</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card lista-pacientes">
+            <h2>Pacientes Cadastrados</h2>
+            <ul id="lista-pacientes"></ul>
+        </section>
+    </main>
+
+    <script src="../src/js/index.js"></script>
+</body>
+</html>

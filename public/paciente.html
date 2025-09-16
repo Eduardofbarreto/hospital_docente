@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Paciente</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Detalhes do Paciente</h1>
+        <a href="index.html" class="btn-voltar">← Voltar</a>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2 id="paciente-nome"></h2>
+            <p><strong>CPF:</strong> <span id="paciente-cpf"></span></p>
+            <p><strong>Data de Nascimento:</strong> <span id="paciente-data-nascimento"></span></p>
+            <p><strong>Endereço:</strong> <span id="paciente-endereco"></span></p>
+
+            <h3>Procedimentos</h3>
+            <p id="paciente-procedimentos"></p>
+
+            <h3>Checklist</h3>
+            <ul id="paciente-checklist"></ul>
+        </section>
+    </main>
+
+    <script src="../src/js/paciente.js"></script>
+</body>
+</html>

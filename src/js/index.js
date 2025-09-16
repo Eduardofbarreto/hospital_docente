@@ -5,13 +5,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSalvar = document.getElementById('btn-salvar');
     const btnLimpar = document.getElementById('btn-limpar');
     const listaPacientes = document.getElementById('lista-pacientes');
-    const inputNovoItem = document.getElementById('novo-item');
-    const btnAdicionarCheck = document.getElementById('btn-adicionar');
-    const listaChecklist = document.getElementById('lista-checklist');
     const inputFiltroPacientes = document.getElementById('filtro-pacientes');
     const toggleDarkModeBtn = document.getElementById('toggle-dark-mode');
+    const notificationContainer = document.getElementById('notification-container');
 
-    let todosPacientes = []; // Variável para armazenar todos os pacientes
+    // Novas referências para os elementos de medicação
+    const inputRemedioNome = document.getElementById('remedio-nome');
+    const inputRemedioHorario = document.getElementById('remedio-horario');
+    const btnAdicionarRemedio = document.getElementById('btn-adicionar-remedio');
+    const listaMedicamentos = document.getElementById('lista-medicamentos');
+
+    let todosPacientes = [];
 
     // Funções do Modo Escuro
     function aplicarTema(isDark) {
@@ -32,52 +36,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
     carregarPreferenciaDeTema();
 
-    // Funções da Checklist
-    function criarItemChecklist(texto, completo = false) {
+    // Funções de Notificação
+    function mostrarNotificacao(mensagem, tipo) {
+        const notification = document.createElement('div');
+        notification.classList.add('notification', tipo);
+        notification.textContent = mensagem;
+        notificationContainer.appendChild(notification);
+        setTimeout(() => {
+            notification.remove();
+        }, 4000);
+    }
+
+    // --- Início das Funções de Medicação (Novo) ---
+    function criarItemMedicamento(remedio, horario) {
         const li = document.createElement('li');
-        li.classList.add('checklist-item');
+        li.classList.add('medication-item');
         li.innerHTML = `
-            <label>
-                <input type="checkbox" ${completo ? 'checked' : ''}>
-                <span>${texto}</span>
-            </label>
-            <div class="checklist-item-actions">
+            <span>${remedio} - ${horario}</span>
+            <div class="medication-item-actions">
                 <button type="button" class="btn-edit" title="Editar">✏️</button>
                 <button type="button" class="btn-delete" title="Excluir">❌</button>
             </div>
         `;
-        listaChecklist.appendChild(li);
+        listaMedicamentos.appendChild(li);
 
         li.querySelector('.btn-delete').addEventListener('click', () => {
             li.remove();
         });
 
         li.querySelector('.btn-edit').addEventListener('click', () => {
-            const novoTexto = prompt("Editar item:", texto);
-            if (novoTexto !== null && novoTexto.trim() !== '') {
-                li.querySelector('span').textContent = novoTexto;
+            const novoNome = prompt("Editar nome do remédio:", remedio);
+            if (novoNome !== null && novoNome.trim() !== '') {
+                const novoHorario = prompt("Editar horário:", horario);
+                if (novoHorario !== null && novoHorario.trim() !== '') {
+                    li.querySelector('span').textContent = `${novoNome} - ${novoHorario}`;
+                }
             }
-        });
-
-        li.querySelector('input[type="checkbox"]').addEventListener('change', () => {
-            // Aqui você pode adicionar lógica para salvar o estado do checkbox, se necessário
         });
     }
 
-    btnAdicionarCheck.addEventListener('click', () => {
-        const texto = inputNovoItem.value.trim();
-        if (texto) {
-            criarItemChecklist(texto);
-            inputNovoItem.value = '';
+    btnAdicionarRemedio.addEventListener('click', () => {
+        const remedio = inputRemedioNome.value.trim();
+        const horario = inputRemedioHorario.value.trim();
+        if (remedio && horario) {
+            criarItemMedicamento(remedio, horario);
+            inputRemedioNome.value = '';
+            inputRemedioHorario.value = '';
         }
     });
 
-    inputNovoItem.addEventListener('keypress', (e) => {
+    inputRemedioHorario.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            btnAdicionarCheck.click();
+            btnAdicionarRemedio.click();
         }
     });
+    // --- Fim das Funções de Medicação ---
 
     // Funções de CRUD (API)
     async function fetchPacientes() {
@@ -88,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderizarPacientes(todosPacientes);
         } catch (error) {
             console.error('Erro ao buscar pacientes:', error);
+            mostrarNotificacao('Erro ao carregar lista de pacientes.', 'error');
         }
     }
 
@@ -101,10 +116,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(paciente)
             });
-            return await response.json();
+            const result = await response.json();
+            if (result.error) {
+                mostrarNotificacao(result.error, 'error');
+            } else {
+                mostrarNotificacao(result.message, 'success');
+            }
+            limparFormulario();
+            fetchPacientes();
         } catch (error) {
             console.error('Erro ao salvar paciente:', error);
-            return { error: 'Erro de conexão ou servidor.' };
+            mostrarNotificacao('Erro de conexão ou servidor.', 'error');
         }
     }
 
@@ -112,10 +134,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('Tem certeza que deseja excluir este paciente?')) {
             try {
                 const response = await fetch(`${apiBaseUrl}?id=${id}`, { method: 'DELETE' });
-                return await response.json();
+                const result = await response.json();
+                if (result.error) {
+                    mostrarNotificacao(result.error, 'error');
+                } else {
+                    mostrarNotificacao(result.message, 'success');
+                }
+                fetchPacientes();
             } catch (error) {
                 console.error('Erro ao deletar paciente:', error);
-                return { error: 'Erro de conexão ou servidor.' };
+                mostrarNotificacao('Erro de conexão ou servidor.', 'error');
             }
         }
     }
@@ -143,12 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn-delete-paciente" data-id="${paciente.id}">❌</button>
                 `;
                 li.appendChild(actionsDiv);
-
                 listaPacientes.appendChild(li);
             });
         }
     }
 
+    // --- Preencher Formulário (Modificado) ---
     function preencherFormulario(paciente) {
         inputId.value = paciente.id;
         document.getElementById('nome').value = paciente.nome;
@@ -158,20 +186,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('endereco').value = paciente.endereco;
         document.getElementById('procedimentos').value = paciente.procedimentos;
         
-        listaChecklist.innerHTML = '';
-        if (Array.isArray(paciente.checklist)) {
-            paciente.checklist.forEach(item => {
-                criarItemChecklist(item.texto, item.completo);
+        // Limpa e preenche a nova lista de medicamentos
+        listaMedicamentos.innerHTML = '';
+        if (Array.isArray(paciente.medicacao)) {
+            paciente.medicacao.forEach(item => {
+                criarItemMedicamento(item.nome_remedio, item.horario);
             });
         }
         
         btnSalvar.textContent = 'Atualizar Paciente';
     }
 
+    // --- Limpar Formulário (Modificado) ---
     function limparFormulario() {
         formPaciente.reset();
         inputId.value = '';
-        listaChecklist.innerHTML = '';
+        listaMedicamentos.innerHTML = ''; // Limpa a lista de medicação
         btnSalvar.textContent = 'Salvar Paciente';
     }
 
@@ -186,18 +216,18 @@ document.addEventListener('DOMContentLoaded', () => {
             data_nascimento: document.getElementById('data-nascimento').value,
             endereco: document.getElementById('endereco').value,
             procedimentos: document.getElementById('procedimentos').value,
-            checklist: Array.from(listaChecklist.querySelectorAll('.checklist-item')).map(li => {
+            // Nova lógica para capturar os dados da medicação
+            medicacao: Array.from(listaMedicamentos.querySelectorAll('.medication-item')).map(li => {
+                const textContent = li.querySelector('span').textContent;
+                const [remedio, horario] = textContent.split(' - ');
                 return {
-                    texto: li.querySelector('span').textContent,
-                    completo: li.querySelector('input[type="checkbox"]').checked
+                    nome_remedio: remedio,
+                    horario: horario
                 };
             })
         };
 
-        const result = await salvarPaciente(paciente);
-        alert(result.message || result.error);
-        limparFormulario();
-        fetchPacientes();
+        salvarPaciente(paciente);
     });
 
     btnLimpar.addEventListener('click', limparFormulario);
@@ -212,12 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (paciente && !paciente.error) {
                 preencherFormulario(paciente);
             } else {
-                alert("Paciente não encontrado.");
+                mostrarNotificacao("Paciente não encontrado.", 'error');
             }
         } else if (target.classList.contains('btn-delete-paciente')) {
-            const result = await deletarPaciente(id);
-            alert(result.message || result.error);
-            fetchPacientes();
+            deletarPaciente(id);
         }
     });
 

@@ -28,12 +28,13 @@
                 <h2>Procedimentos</h2>
                 <textarea id="procedimentos" rows="5"></textarea>
 
-                <h2>Checklist de Tarefas</h2>
-                <div class="checklist-input">
-                    <input type="text" id="novo-item" placeholder="Adicionar nova tarefa...">
-                    <button type="button" id="btn-adicionar" class="btn-icon">&#43;</button>
+                <h2>Controle de Medicação</h2>
+                <div class="medication-input">
+                    <input type="text" id="remedio-nome" placeholder="Nome do remédio..." required>
+                    <input type="time" id="remedio-horario" required>
+                    <button type="button" id="btn-adicionar-remedio" class="btn-icon">Adicionar</button>
                 </div>
-                <ul id="lista-checklist"></ul>
+                <ul id="lista-medicamentos"></ul>
                 
                 <div class="form-actions">
                     <button type="submit" id="btn-salvar">Salvar Paciente</button>
@@ -48,6 +49,8 @@
             <ul id="lista-pacientes"></ul>
         </section>
     </main>
+
+    <div id="notification-container"></div>
 
     <script src="../src/js/index.js"></script>
 </body>

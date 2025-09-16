@@ -19,16 +19,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('paciente-endereco').textContent = paciente.endereco;
                 document.getElementById('paciente-procedimentos').textContent = paciente.procedimentos;
                 
-                // Preenche a checklist
-                const checklistUl = document.getElementById('paciente-checklist');
-                checklistUl.innerHTML = '';
-                if (Array.isArray(paciente.checklist)) {
-                    paciente.checklist.forEach(item => {
+                // --- NOVO: Preenche a lista de medicamentos ---
+                const listaMedicamentos = document.getElementById('paciente-medicamentos');
+                listaMedicamentos.innerHTML = '';
+                if (Array.isArray(paciente.medicacao)) {
+                    paciente.medicacao.forEach(item => {
                         const li = document.createElement('li');
-                        li.textContent = `${item.completo ? '[✅] ' : '[ ] '} ${item.texto}`;
-                        checklistUl.appendChild(li);
+                        li.textContent = `${item.nome_remedio} - ${item.horario}`;
+                        listaMedicamentos.appendChild(li);
                     });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = 'Nenhuma medicação cadastrada.';
+                    listaMedicamentos.appendChild(li);
                 }
+                // --- FIM DA MUDANÇA ---
             } else {
                 document.getElementById('paciente-nome').textContent = 'Paciente não encontrado.';
             }

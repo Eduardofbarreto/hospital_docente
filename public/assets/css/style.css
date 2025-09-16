@@ -9,6 +9,18 @@
     --text-dark: #343a40;
 }
 
+body.dark-mode {
+    --primary-color: #4da6ff;
+    --secondary-color: #99a2ab;
+    --success-color: #44b76c;
+    --danger-color: #e06060;
+    --bg-light: #2c2f33;
+    --bg-card: #3b3d40;
+    --border-color: #55575a;
+    --text-dark: #f0f2f5;
+    color: var(--text-dark);
+}
+
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background-color: var(--bg-light);
@@ -16,6 +28,7 @@ body {
     margin: 0;
     padding: 20px;
     line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
@@ -31,6 +44,7 @@ body {
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.3s;
 }
 
 h1, h2 {
@@ -55,6 +69,7 @@ header {
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     position: relative;
+    transition: background-color 0.3s;
 }
 
 header h1 {
@@ -91,6 +106,8 @@ input[type="text"], input[type="date"], textarea {
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 5px;
+    background-color: var(--bg-card);
+    color: var(--text-dark);
 }
 
 textarea {
@@ -150,8 +167,16 @@ textarea {
     transition: background-color 0.3s;
 }
 
+.dark-mode .checklist-item {
+    background-color: #4a4d51;
+}
+
 .checklist-item:hover {
     background-color: #e2e6ea;
+}
+
+.dark-mode .checklist-item:hover {
+    background-color: #515357;
 }
 
 .checklist-item input[type="checkbox"] {
@@ -181,6 +206,10 @@ textarea {
     background-color: #f1f1f1;
 }
 
+.dark-mode .paciente-item:hover {
+    background-color: #4a4d51;
+}
+
 .paciente-item a {
     text-decoration: none;
     color: var(--text-dark);
@@ -196,3 +225,19 @@ textarea {
 
 .paciente-item-actions .btn-edit { color: var(--success-color); }
 .paciente-item-actions .btn-delete { color: var(--danger-color); }
+
+#toggle-dark-mode {
+    position: absolute;
+    right: 25px;
+    top: 25px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+#toggle-dark-mode:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}

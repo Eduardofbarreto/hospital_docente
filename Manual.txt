@@ -1,0 +1,11 @@
+http://localhost/proj/public/index.html
+
+Link para rodar o sistema.
+
+Neste espaço você cadastra um paciente
+Logo após, você pode colocar obs
+Também fazer um checklist sobre sua situação
+
+Pode consultar este paciênte
+Deletar
+Editar

@@ -9,8 +9,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAdicionarCheck = document.getElementById('btn-adicionar');
     const listaChecklist = document.getElementById('lista-checklist');
     const inputFiltroPacientes = document.getElementById('filtro-pacientes');
+    const toggleDarkModeBtn = document.getElementById('toggle-dark-mode');
 
     let todosPacientes = []; // Variável para armazenar todos os pacientes
+
+    // Funções do Modo Escuro
+    function aplicarTema(isDark) {
+        document.body.classList.toggle('dark-mode', isDark);
+        toggleDarkModeBtn.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+    }
+
+    function carregarPreferenciaDeTema() {
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        aplicarTema(isDark);
+    }
+
+    toggleDarkModeBtn.addEventListener('click', () => {
+        const isDark = !document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        aplicarTema(isDark);
+    });
+
+    carregarPreferenciaDeTema();
 
     // Funções da Checklist
     function criarItemChecklist(texto, completo = false) {
@@ -64,8 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(apiBaseUrl);
             const pacientes = await response.json();
-            todosPacientes = pacientes; // Armazena a lista completa
-            renderizarPacientes(todosPacientes); // Renderiza a lista completa
+            todosPacientes = pacientes;
+            renderizarPacientes(todosPacientes);
         } catch (error) {
             console.error('Erro ao buscar pacientes:', error);
         }
@@ -73,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function salvarPaciente(paciente) {
         const method = paciente.id ? 'PUT' : 'POST';
-        const url = apiBaseUrl; 
+        const url = apiBaseUrl;
         
         try {
             const response = await fetch(url, {
@@ -104,19 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderizarPacientes(pacientes) {
         listaPacientes.innerHTML = '';
         if (Array.isArray(pacientes)) {
-            // Ordena os pacientes em ordem alfabética pelo nome
             pacientes.sort((a, b) => a.nome.localeCompare(b.nome));
 
             pacientes.forEach(paciente => {
                 const li = document.createElement('li');
                 li.classList.add('paciente-item');
                 
-                // Cria o link clicável
                 const link = document.createElement('a');
                 link.href = `paciente.html?id=${paciente.id}`;
                 link.textContent = `${paciente.nome} ${paciente.sobrenome}`;
                 
-                // Adiciona o link e os botões à lista
                 li.appendChild(link);
                 
                 const actionsDiv = document.createElement('div');
@@ -180,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await salvarPaciente(paciente);
         alert(result.message || result.error);
         limparFormulario();
-        fetchPacientes(); // Atualiza a lista
+        fetchPacientes();
     });
 
     btnLimpar.addEventListener('click', limparFormulario);

@@ -7,27 +7,36 @@
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-
     <header>
         <h1>Detalhes do Paciente</h1>
-        <a href="index.html" class="btn-voltar">← Voltar</a>
+        <a href="index.html" class="btn-voltar">Voltar</a>
+        <button id="toggle-dark-mode">Modo Escuro</button>
     </header>
 
     <main class="container">
         <section class="card">
-            <h2 id="paciente-nome"></h2>
-            <p><strong>CPF:</strong> <span id="paciente-cpf"></span></p>
-            <p><strong>Data de Nascimento:</strong> <span id="paciente-data-nascimento"></span></p>
-            <p><strong>Endereço:</strong> <span id="paciente-endereco"></span></p>
+            <div class="paciente-info">
+                <h2 id="paciente-nome"></h2>
+                <h3>Dados Pessoais</h3>
+                <p><strong>CPF:</strong> <span id="paciente-cpf"></span></p>
+                <p><strong>Nascimento:</strong> <span id="paciente-nascimento"></span></p>
+                <p><strong>Endereço:</strong> <span id="paciente-endereco"></span></p>
+                
+                <h3>Informações de Baixa</h3>
+                <p><strong>Data de Baixa:</strong> <span id="data-baixa"></span></p>
+                <p><strong>Horário de Baixa:</strong> <span id="horario-baixa"></span></p>
 
-            <h3>Procedimentos</h3>
-            <p id="paciente-procedimentos"></p>
+                <h3>Procedimentos</h3>
+                <p id="paciente-procedimentos"></p>
 
-            <h3>Medicação</h3>
-            <ul id="paciente-medicamentos"></ul>
+                <h3>Medicação</h3>
+                <ul id="lista-medicamentos"></ul>
+            </div>
         </section>
     </main>
-
+    
+    <div id="notification-container"></div>
+    
     <script src="../src/js/paciente.js"></script>
 </body>
 </html>

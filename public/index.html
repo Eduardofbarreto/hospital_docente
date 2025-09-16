@@ -19,32 +19,67 @@
             <h2>Dados do Paciente</h2>
             <form id="form-paciente">
                 <input type="hidden" id="paciente-id">
-                <label for="nome">Nome:</label><input type="text" id="nome" required>
-                <label for="sobrenome">Sobrenome:</label><input type="text" id="sobrenome" required>
-                <label for="cpf">CPF:</label><input type="text" id="cpf" required>
-                <label for="data-nascimento">Nascimento:</label><input type="date" id="data-nascimento">
-                <label for="endereco">Endereço:</label><textarea id="endereco"></textarea>
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" required>
+                <label for="sobrenome">Sobrenome:</label>
+                <input type="text" id="sobrenome" required>
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf" required>
+                <label for="data-nascimento">Nascimento:</label>
+                <input type="date" id="data-nascimento">
+                <label for="endereco">Endereço:</label>
+                <textarea id="endereco"></textarea>
+
+                <h2>Informações de Baixa</h2>
+                <label for="data-baixa">Data de Baixa:</label>
+                <input type="date" id="data-baixa">
+                <label for="horario-baixa">Horário de Baixa:</label>
+                <div class="time-input-group">
+                    <div class="time-part">
+                        <button type="button" class="btn-time" id="btn-baixa-hour-up">+</button>
+                        <input type="text" id="baixa-hora" value="00" maxlength="2" readonly>
+                        <button type="button" class="btn-time" id="btn-baixa-hour-down">-</button>
+                    </div>
+                    <span>:</span>
+                    <div class="time-part">
+                        <button type="button" class="btn-time" id="btn-baixa-minute-up">+</button>
+                        <input type="text" id="baixa-minuto" value="00" maxlength="2" readonly>
+                        <button type="button" class="btn-time" id="btn-baixa-minute-down">-</button>
+                    </div>
+                </div>
                 
                 <h2>Procedimentos</h2>
                 <textarea id="procedimentos" rows="5"></textarea>
 
                 <h2>Controle de Medicação</h2>
-                    <div class="medication-input-group">
-                        <select id="remedio-select">
-                            <option value="">Selecione um remédio...</option>
-                            <option value="Ibuprofeno">Ibuprofeno</option>
-                            <option value="Dipirona">Dipirona</option>
-                            <option value="Amoxicilina">Amoxicilina</option>
-                            <option value="Omeprazol">Omeprazol</option>
-                            <option value="Losartana">Losartana</option>
-                            <option value="Metformina">Metformina</option>
-                            <option value="Paracetamol">Paracetamol</option>
-                            <option value="outro">Outro...</option>
-                        </select>
-                <input type="text" id="remedio-nome-personalizado" placeholder="Digite o nome do remédio..." style="display: none;">
-                <input type="time" id="remedio-horario" required>
-                <button type="button" id="btn-adicionar-remedio" class="btn-icon">Adicionar</button>
+                <div class="medication-input-group">
+                    <select id="remedio-select">
+                        <option value="">Selecione um remédio...</option>
+                        <option value="Ibuprofeno">Ibuprofeno</option>
+                        <option value="Dipirona">Dipirona</option>
+                        <option value="Amoxicilina">Amoxicilina</option>
+                        <option value="Omeprazol">Omeprazol</option>
+                        <option value="Losartana">Losartana</option>
+                        <option value="Metformina">Metformina</option>
+                        <option value="Paracetamol">Paracetamol</option>
+                        <option value="outro">Outro...</option>
+                    </select>
+                    <input type="text" id="remedio-nome-personalizado" placeholder="Digite o nome do remédio..." style="display: none;">
+                    <div class="time-input-group">
+                        <div class="time-part">
+                            <button type="button" class="btn-time" id="btn-hour-up">+</button>
+                            <input type="text" id="remedio-hora" value="00" maxlength="2" readonly>
+                            <button type="button" class="btn-time" id="btn-hour-down">-</button>
+                        </div>
+                        <span>:</span>
+                        <div class="time-part">
+                            <button type="button" class="btn-time" id="btn-minute-up">+</button>
+                            <input type="text" id="remedio-minuto" value="00" maxlength="2" readonly>
+                            <button type="button" class="btn-time" id="btn-minute-down">-</button>
+                        </div>
                     </div>
+                    <button type="button" id="btn-adicionar-remedio" class="btn-icon">Adicionar</button>
+                </div>
                 <ul id="lista-medicamentos"></ul>
                 
                 <div class="form-actions">

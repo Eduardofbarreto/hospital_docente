@@ -1,3 +1,4 @@
+/* Variáveis de Cores */
 :root {
     --primary-color: #007bff;
     --secondary-color: #6c757d;
@@ -9,6 +10,7 @@
     --text-dark: #343a40;
 }
 
+/* Modo Escuro */
 body.dark-mode {
     --primary-color: #4da6ff;
     --secondary-color: #99a2ab;
@@ -21,6 +23,7 @@ body.dark-mode {
     color: var(--text-dark);
 }
 
+/* Estilos Globais e Gerais */
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background-color: var(--bg-light);
@@ -39,6 +42,7 @@ body {
     gap: 25px;
 }
 
+/* Estilos de Componentes */
 .card {
     background-color: var(--bg-card);
     padding: 30px;
@@ -101,7 +105,10 @@ label {
     font-weight: 600;
 }
 
-input[type="text"], input[type="date"], textarea {
+input[type="text"],
+input[type="date"],
+textarea,
+select {
     width: calc(100% - 22px);
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -112,27 +119,6 @@ input[type="text"], input[type="date"], textarea {
 
 textarea {
     resize: vertical;
-}
-
-.checklist-input {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-#btn-adicionar {
-    background-color: var(--success-color);
-    color: white;
-    font-size: 20px;
-    padding: 5px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-#btn-adicionar:hover {
-    background-color: #218838;
 }
 
 .form-actions {
@@ -156,7 +142,7 @@ textarea {
 #btn-limpar { background-color: var(--secondary-color); }
 #btn-limpar:hover { background-color: #5a6268; }
 
-.checklist-item {
+.medication-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -167,23 +153,19 @@ textarea {
     transition: background-color 0.3s;
 }
 
-.dark-mode .checklist-item {
+.dark-mode .medication-item {
     background-color: #4a4d51;
 }
 
-.checklist-item:hover {
+.medication-item:hover {
     background-color: #e2e6ea;
 }
 
-.dark-mode .checklist-item:hover {
+.dark-mode .medication-item:hover {
     background-color: #515357;
 }
 
-.checklist-item input[type="checkbox"] {
-    margin-right: 10px;
-}
-
-.checklist-item-actions button {
+.medication-item-actions button {
     background: none;
     border: none;
     cursor: pointer;
@@ -289,4 +271,80 @@ textarea {
         opacity: 0;
         transform: translateY(-20px);
     }
+}
+
+/* --- Novos Estilos para o Controle de Medicação --- */
+
+/* Estilos para o grupo de entrada de medicação */
+.medication-input-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Estilos para o grupo de entrada de hora */
+.time-input-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Estilos para as partes individuais de hora e minuto */
+.time-part {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Estilo para os botões de controle de tempo */
+.btn-time {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #333;
+    width: 25px;
+    height: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.btn-time:hover {
+    background-color: #e0e0e0;
+}
+
+/* Estilo para os campos de texto de hora e minuto */
+#remedio-hora,
+#remedio-minuto {
+    width: 40px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: var(--bg-card);
+    color: var(--text-dark);
+}
+
+/* Ajustes para o modo escuro */
+body.dark-mode .btn-time {
+    background-color: #555;
+    border-color: #666;
+    color: #eee;
+}
+
+body.dark-mode .btn-time:hover {
+    background-color: #666;
+}
+
+body.dark-mode #remedio-hora,
+body.dark-mode #remedio-minuto {
+    background-color: #333;
+    border-color: #555;
+    color: #eee;
 }

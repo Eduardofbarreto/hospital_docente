@@ -1,48 +1,97 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const apiBaseUrl = 'http://localhost/proj/src/php/api.php'; 
+document.addEventListener('DOMContentLoaded', () => {
+    const apiBaseUrl = 'http://localhost/proj/src/php/api.php';
+    const notificationContainer = document.getElementById('notification-container');
+    const toggleDarkModeBtn = document.getElementById('toggle-dark-mode');
 
-    // Pega o ID do paciente da URL (ex: paciente.html?id=123)
-    const urlParams = new URLSearchParams(window.location.search);
-    const pacienteId = urlParams.get('id');
+    // Funções do Modo Escuro
+    function aplicarTema(isDark) {
+        document.body.classList.toggle('dark-mode', isDark);
+        toggleDarkModeBtn.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+    }
 
-    if (pacienteId) {
+    function carregarPreferenciaDeTema() {
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        aplicarTema(isDark);
+    }
+
+    toggleDarkModeBtn.addEventListener('click', () => {
+        const isDark = !document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        aplicarTema(isDark);
+    });
+
+    carregarPreferenciaDeTema();
+
+    // Funções de Notificação
+    function mostrarNotificacao(mensagem, tipo) {
+        const notification = document.createElement('div');
+        notification.classList.add('notification', tipo);
+        notification.textContent = mensagem;
+        notificationContainer.appendChild(notification);
+        setTimeout(() => {
+            notification.remove();
+        }, 4000);
+    }
+
+    // Função para buscar e exibir os dados do paciente
+    async function fetchPaciente() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const pacienteId = urlParams.get('id');
+
+        if (!pacienteId) {
+            mostrarNotificacao('ID do paciente não fornecido.', 'error');
+            return;
+        }
+
         try {
-            // Faz a requisição para a API com o ID do paciente
             const response = await fetch(`${apiBaseUrl}?id=${pacienteId}`);
             const paciente = await response.json();
 
-            // Preenche a página com os dados recebidos
-            if (paciente && !paciente.error) {
-                document.getElementById('paciente-nome').textContent = `${paciente.nome} ${paciente.sobrenome}`;
-                document.getElementById('paciente-cpf').textContent = paciente.cpf;
-                document.getElementById('paciente-data-nascimento').textContent = paciente.data_nascimento;
-                document.getElementById('paciente-endereco').textContent = paciente.endereco;
-                document.getElementById('paciente-procedimentos').textContent = paciente.procedimentos;
-                
-                // --- NOVO: Preenche a lista de medicamentos ---
-                const listaMedicamentos = document.getElementById('paciente-medicamentos');
-                listaMedicamentos.innerHTML = '';
-                if (Array.isArray(paciente.medicacao)) {
-                    paciente.medicacao.forEach(item => {
-                        const li = document.createElement('li');
-                        li.textContent = `${item.nome_remedio} - ${item.horario}`;
-                        listaMedicamentos.appendChild(li);
-                    });
-                } else {
-                    const li = document.createElement('li');
-                    li.textContent = 'Nenhuma medicação cadastrada.';
-                    listaMedicamentos.appendChild(li);
-                }
-                // --- FIM DA MUDANÇA ---
+            if (paciente.error) {
+                mostrarNotificacao(paciente.error, 'error');
             } else {
-                document.getElementById('paciente-nome').textContent = 'Paciente não encontrado.';
+                displayPacienteData(paciente);
             }
-
         } catch (error) {
             console.error('Erro ao buscar dados do paciente:', error);
-            document.getElementById('paciente-nome').textContent = 'Erro ao carregar os dados.';
+            mostrarNotificacao('Erro ao carregar dados do paciente.', 'error');
         }
-    } else {
-        document.getElementById('paciente-nome').textContent = 'ID do paciente não especificado.';
     }
+
+    // Função para formatar a data
+    function formatarData(data) {
+        if (!data) return 'Não informada';
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    // Função para exibir os dados na tela (MODIFICADA)
+    function displayPacienteData(paciente) {
+        document.getElementById('paciente-nome').textContent = `${paciente.nome} ${paciente.sobrenome}`;
+        document.getElementById('paciente-cpf').textContent = paciente.cpf;
+        document.getElementById('paciente-nascimento').textContent = formatarData(paciente.data_nascimento);
+        document.getElementById('paciente-endereco').textContent = paciente.endereco;
+        document.getElementById('paciente-procedimentos').textContent = paciente.procedimentos;
+
+        // NOVOS CAMPOS
+        document.getElementById('data-baixa').textContent = paciente.data_baixa ? formatarData(paciente.data_baixa) : 'Não informada';
+        document.getElementById('horario-baixa').textContent = paciente.horario_baixa || 'Não informado';
+
+        // Medicação
+        const listaMedicamentos = document.getElementById('lista-medicamentos');
+        listaMedicamentos.innerHTML = '';
+        if (paciente.medicacao && paciente.medicacao.length > 0) {
+            paciente.medicacao.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.nome_remedio} - ${item.horario}`;
+                listaMedicamentos.appendChild(li);
+            });
+        } else {
+            const li = document.createElement('li');
+            li.textContent = 'Nenhuma medicação registrada.';
+            listaMedicamentos.appendChild(li);
+        }
+    }
+
+    fetchPaciente();
 });

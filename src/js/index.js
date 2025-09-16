@@ -9,11 +9,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleDarkModeBtn = document.getElementById('toggle-dark-mode');
     const notificationContainer = document.getElementById('notification-container');
 
-    // Novas referências para os elementos de medicação
-    const inputRemedioNome = document.getElementById('remedio-nome');
-    const inputRemedioHorario = document.getElementById('remedio-horario');
+    const remedioSelect = document.getElementById('remedio-select');
+    const inputRemedioPersonalizado = document.getElementById('remedio-nome-personalizado');
+    const inputRemedioHora = document.getElementById('remedio-hora');
+    const inputRemedioMinuto = document.getElementById('remedio-minuto');
+    const btnHourUp = document.getElementById('btn-hour-up');
+    const btnHourDown = document.getElementById('btn-hour-down');
+    const btnMinuteUp = document.getElementById('btn-minute-up');
+    const btnMinuteDown = document.getElementById('btn-minute-down');
+
     const btnAdicionarRemedio = document.getElementById('btn-adicionar-remedio');
     const listaMedicamentos = document.getElementById('lista-medicamentos');
+
+    // NOVAS REFERÊNCIAS
+    const inputDataBaixa = document.getElementById('data-baixa');
+    const inputBaixaHora = document.getElementById('baixa-hora');
+    const inputBaixaMinuto = document.getElementById('baixa-minuto');
+    const btnBaixaHourUp = document.getElementById('btn-baixa-hour-up');
+    const btnBaixaHourDown = document.getElementById('btn-baixa-hour-down');
+    const btnBaixaMinuteUp = document.getElementById('btn-baixa-minute-up');
+    const btnBaixaMinuteDown = document.getElementById('btn-baixa-minute-down');
 
     let todosPacientes = [];
 
@@ -47,7 +62,68 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // --- Início das Funções de Medicação (Novo) ---
+    // --- Lógica de controle de hora e minuto para Medicamento ---
+    function formatTime(value) {
+        return value.toString().padStart(2, '0');
+    }
+
+    btnHourUp.addEventListener('click', () => {
+        let hour = parseInt(inputRemedioHora.value);
+        hour = (hour + 1) % 24;
+        inputRemedioHora.value = formatTime(hour);
+    });
+
+    btnHourDown.addEventListener('click', () => {
+        let hour = parseInt(inputRemedioHora.value);
+        hour = (hour - 1 + 24) % 24;
+        inputRemedioHora.value = formatTime(hour);
+    });
+
+    btnMinuteUp.addEventListener('click', () => {
+        let minute = parseInt(inputRemedioMinuto.value);
+        minute = (minute + 1) % 60;
+        inputRemedioMinuto.value = formatTime(minute);
+    });
+
+    btnMinuteDown.addEventListener('click', () => {
+        let minute = parseInt(inputRemedioMinuto.value);
+        minute = (minute - 1 + 60) % 60;
+        inputRemedioMinuto.value = formatTime(minute);
+    });
+    
+    // --- Lógica de controle de hora e minuto para Baixa (NOVO) ---
+    btnBaixaHourUp.addEventListener('click', () => {
+        let hour = parseInt(inputBaixaHora.value);
+        hour = (hour + 1) % 24;
+        inputBaixaHora.value = formatTime(hour);
+    });
+
+    btnBaixaHourDown.addEventListener('click', () => {
+        let hour = parseInt(inputBaixaHora.value);
+        hour = (hour - 1 + 24) % 24;
+        inputBaixaHora.value = formatTime(hour);
+    });
+
+    btnBaixaMinuteUp.addEventListener('click', () => {
+        let minute = parseInt(inputBaixaMinuto.value);
+        minute = (minute + 1) % 60;
+        inputBaixaMinuto.value = formatTime(minute);
+    });
+
+    btnBaixaMinuteDown.addEventListener('click', () => {
+        let minute = parseInt(inputBaixaMinuto.value);
+        minute = (minute - 1 + 60) % 60;
+        inputBaixaMinuto.value = formatTime(minute);
+    });
+
+    // --- Funções de Medicação ---
+    remedioSelect.addEventListener('change', () => {
+        inputRemedioPersonalizado.style.display = remedioSelect.value === 'outro' ? 'inline-block' : 'none';
+        if (remedioSelect.value !== 'outro') {
+            inputRemedioPersonalizado.value = '';
+        }
+    });
+
     function criarItemMedicamento(remedio, horario) {
         const li = document.createElement('li');
         li.classList.add('medication-item');
@@ -65,33 +141,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         li.querySelector('.btn-edit').addEventListener('click', () => {
-            const novoNome = prompt("Editar nome do remédio:", remedio);
-            if (novoNome !== null && novoNome.trim() !== '') {
-                const novoHorario = prompt("Editar horário:", horario);
-                if (novoHorario !== null && novoHorario.trim() !== '') {
-                    li.querySelector('span').textContent = `${novoNome} - ${novoHorario}`;
+            const novoTexto = prompt("Editar item (Nome - Horário):", `${remedio} - ${horario}`);
+            if (novoTexto !== null && novoTexto.trim() !== '') {
+                const partes = novoTexto.split(' - ');
+                if (partes.length === 2) {
+                    li.querySelector('span').textContent = novoTexto;
+                } else {
+                    alert("Formato inválido. Use 'Nome - Horário'.");
                 }
             }
         });
     }
 
     btnAdicionarRemedio.addEventListener('click', () => {
-        const remedio = inputRemedioNome.value.trim();
-        const horario = inputRemedioHorario.value.trim();
+        let remedio = remedioSelect.value;
+        if (remedio === 'outro') {
+            remedio = inputRemedioPersonalizado.value.trim();
+        }
+        const hora = inputRemedioHora.value;
+        const minuto = inputRemedioMinuto.value;
+        const horario = `${hora}:${minuto}`;
+
         if (remedio && horario) {
             criarItemMedicamento(remedio, horario);
-            inputRemedioNome.value = '';
-            inputRemedioHorario.value = '';
+            remedioSelect.value = '';
+            inputRemedioPersonalizado.value = '';
+            inputRemedioPersonalizado.style.display = 'none';
+            inputRemedioHora.value = '00';
+            inputRemedioMinuto.value = '00';
+        } else {
+            mostrarNotificacao("Por favor, selecione ou digite o nome do remédio e o horário.", "error");
         }
     });
-
-    inputRemedioHorario.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            btnAdicionarRemedio.click();
-        }
-    });
-    // --- Fim das Funções de Medicação ---
 
     // Funções de CRUD (API)
     async function fetchPacientes() {
@@ -176,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Preencher Formulário (Modificado) ---
+    // --- Preencher Formulário (MODIFICADO) ---
     function preencherFormulario(paciente) {
         inputId.value = paciente.id;
         document.getElementById('nome').value = paciente.nome;
@@ -186,7 +267,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('endereco').value = paciente.endereco;
         document.getElementById('procedimentos').value = paciente.procedimentos;
         
-        // Limpa e preenche a nova lista de medicamentos
+        // Novos campos de baixa
+        document.getElementById('data-baixa').value = paciente.data_baixa || '';
+        if (paciente.horario_baixa) {
+            const [hora, minuto] = paciente.horario_baixa.split(':');
+            inputBaixaHora.value = hora;
+            inputBaixaMinuto.value = minuto;
+        } else {
+            inputBaixaHora.value = '00';
+            inputBaixaMinuto.value = '00';
+        }
+
+        // Medicação
         listaMedicamentos.innerHTML = '';
         if (Array.isArray(paciente.medicacao)) {
             paciente.medicacao.forEach(item => {
@@ -197,17 +289,27 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSalvar.textContent = 'Atualizar Paciente';
     }
 
-    // --- Limpar Formulário (Modificado) ---
+    // --- Limpar Formulário (MODIFICADO) ---
     function limparFormulario() {
         formPaciente.reset();
         inputId.value = '';
-        listaMedicamentos.innerHTML = ''; // Limpa a lista de medicação
+        listaMedicamentos.innerHTML = '';
+        remedioSelect.value = '';
+        inputRemedioPersonalizado.value = '';
+        inputRemedioPersonalizado.style.display = 'none';
+        inputRemedioHora.value = '00';
+        inputRemedioMinuto.value = '00';
+        inputBaixaHora.value = '00';
+        inputBaixaMinuto.value = '00';
         btnSalvar.textContent = 'Salvar Paciente';
     }
 
-    // Eventos
+    // --- Eventos (MODIFICADO) ---
     formPaciente.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const horarioBaixa = `${inputBaixaHora.value}:${inputBaixaMinuto.value}`;
+
         const paciente = {
             id: inputId.value || null,
             nome: document.getElementById('nome').value,
@@ -216,13 +318,17 @@ document.addEventListener('DOMContentLoaded', () => {
             data_nascimento: document.getElementById('data-nascimento').value,
             endereco: document.getElementById('endereco').value,
             procedimentos: document.getElementById('procedimentos').value,
-            // Nova lógica para capturar os dados da medicação
+            
+            // Novos campos
+            data_baixa: document.getElementById('data-baixa').value || null,
+            horario_baixa: horarioBaixa === '00:00' ? null : horarioBaixa,
+
             medicacao: Array.from(listaMedicamentos.querySelectorAll('.medication-item')).map(li => {
                 const textContent = li.querySelector('span').textContent;
                 const [remedio, horario] = textContent.split(' - ');
                 return {
-                    nome_remedio: remedio,
-                    horario: horario
+                    nome_remedio: remedio.trim(),
+                    horario: horario.trim()
                 };
             })
         };

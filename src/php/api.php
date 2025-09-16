@@ -1,5 +1,4 @@
 <?php
-// Linhas para depuração (remova em produção)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -30,13 +29,14 @@ switch ($method) {
             break;
         }
         
-        // NOVO: Altera a coluna de 'checklist' para 'medicacao'
-        $sql = "INSERT INTO pacientes (nome, sobrenome, cpf, data_nascimento, endereco, procedimentos, medicacao) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO pacientes (nome, sobrenome, cpf, data_nascimento, endereco, procedimentos, medicacao, data_baixa, horario_baixa) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         
-        // NOVO: Codifica o array de 'medicacao' para JSON
         $medicacaoJson = json_encode($data['medicacao'] ?? []);
-        $stmt->bind_param("sssssss", $data['nome'], $data['sobrenome'], $data['cpf'], $data['data_nascimento'], $data['endereco'], $data['procedimentos'], $medicacaoJson);
+        $dataBaixa = $data['data_baixa'] ?? null;
+        $horarioBaixa = $data['horario_baixa'] ?? null;
+        
+        $stmt->bind_param("sssssssss", $data['nome'], $data['sobrenome'], $data['cpf'], $data['data_nascimento'], $data['endereco'], $data['procedimentos'], $medicacaoJson, $dataBaixa, $horarioBaixa);
         
         if ($stmt->execute()) {
             echo json_encode(["message" => "Paciente cadastrado com sucesso!", "id" => $conn->insert_id]);
@@ -55,7 +55,6 @@ switch ($method) {
             $result = $stmt->get_result();
             $paciente = $result->fetch_assoc();
             if ($paciente) {
-                // NOVO: Decodifica o JSON da coluna 'medicacao'
                 $paciente['medicacao'] = json_decode($paciente['medicacao'], true) ?? [];
                 echo json_encode($paciente);
             } else {
@@ -68,7 +67,6 @@ switch ($method) {
             $pacientes = [];
             if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
-                    // NOVO: Decodifica o JSON da coluna 'medicacao' na lista
                     $row['medicacao'] = json_decode($row['medicacao'], true) ?? [];
                     $pacientes[] = $row;
                 }
@@ -86,13 +84,14 @@ switch ($method) {
         }
         $id = $data['id'];
         
-        // NOVO: Altera a coluna de 'checklist' para 'medicacao'
-        $sql = "UPDATE pacientes SET nome=?, sobrenome=?, cpf=?, data_nascimento=?, endereco=?, procedimentos=?, medicacao=? WHERE id=?";
+        $sql = "UPDATE pacientes SET nome=?, sobrenome=?, cpf=?, data_nascimento=?, endereco=?, procedimentos=?, medicacao=?, data_baixa=?, horario_baixa=? WHERE id=?";
         $stmt = $conn->prepare($sql);
         
-        // NOVO: Codifica o array de 'medicacao' para JSON
         $medicacaoJson = json_encode($data['medicacao'] ?? []);
-        $stmt->bind_param("sssssssi", $data['nome'], $data['sobrenome'], $data['cpf'], $data['data_nascimento'], $data['endereco'], $data['procedimentos'], $medicacaoJson, $id);
+        $dataBaixa = $data['data_baixa'] ?? null;
+        $horarioBaixa = $data['horario_baixa'] ?? null;
+
+        $stmt->bind_param("sssssssssi", $data['nome'], $data['sobrenome'], $data['cpf'], $data['data_nascimento'], $data['endereco'], $data['procedimentos'], $medicacaoJson, $dataBaixa, $horarioBaixa, $id);
         
         if ($stmt->execute()) {
             echo json_encode(["message" => "Paciente atualizado com sucesso!"]);

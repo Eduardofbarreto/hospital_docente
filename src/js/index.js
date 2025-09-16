@@ -5,9 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSalvar = document.getElementById('btn-salvar');
     const btnLimpar = document.getElementById('btn-limpar');
     const listaPacientes = document.getElementById('lista-pacientes');
-    const inputNovoItem = document = document.getElementById('novo-item');
+    const inputNovoItem = document.getElementById('novo-item');
     const btnAdicionarCheck = document.getElementById('btn-adicionar');
     const listaChecklist = document.getElementById('lista-checklist');
+    const inputFiltroPacientes = document.getElementById('filtro-pacientes');
+
+    let todosPacientes = []; // Variável para armazenar todos os pacientes
 
     // Funções da Checklist
     function criarItemChecklist(texto, completo = false) {
@@ -61,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(apiBaseUrl);
             const pacientes = await response.json();
-            renderizarPacientes(pacientes);
+            todosPacientes = pacientes; // Armazena a lista completa
+            renderizarPacientes(todosPacientes); // Renderiza a lista completa
         } catch (error) {
             console.error('Erro ao buscar pacientes:', error);
         }
@@ -176,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await salvarPaciente(paciente);
         alert(result.message || result.error);
         limparFormulario();
-        fetchPacientes();
+        fetchPacientes(); // Atualiza a lista
     });
 
     btnLimpar.addEventListener('click', limparFormulario);
@@ -199,6 +203,18 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchPacientes();
         }
     });
+
+    // Funções de Pesquisa
+    function filtrarPacientes() {
+        const termoBusca = inputFiltroPacientes.value.toLowerCase();
+        const pacientesFiltrados = todosPacientes.filter(paciente => {
+            const nomeCompleto = `${paciente.nome} ${paciente.sobrenome}`.toLowerCase();
+            const cpf = paciente.cpf;
+            return nomeCompleto.includes(termoBusca) || cpf.includes(termoBusca);
+        });
+        renderizarPacientes(pacientesFiltrados);
+    }
+    inputFiltroPacientes.addEventListener('input', filtrarPacientes);
 
     fetchPacientes();
 });

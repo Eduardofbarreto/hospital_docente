@@ -19,7 +19,6 @@
             <h2>Dados do Paciente</h2>
             <form id="form-paciente">
                 <input type="hidden" id="paciente-id">
-                <input type="hidden" id="data-entrada">
                 <label for="nome">Nome:</label>
                 <input type="text" id="nome" required>
                 <label for="sobrenome">Sobrenome:</label>
@@ -30,6 +29,23 @@
                 <input type="date" id="data-nascimento">
                 <label for="endereco">Endereço:</label>
                 <textarea id="endereco"></textarea>
+
+                <label for="data-entrada">Data de Entrada:</label>
+                <input type="date" id="data-entrada">
+                <label for="horario-entrada">Horário de Entrada:</label>
+                <div class="time-input-group">
+                    <div class="time-part">
+                        <button type="button" class="btn-time" id="btn-entrada-hour-up">+</button>
+                        <input type="text" id="entrada-hora" value="00" maxlength="2" readonly>
+                        <button type="button" class="btn-time" id="btn-entrada-hour-down">-</button>
+                    </div>
+                    <span>:</span>
+                    <div class="time-part">
+                        <button type="button" class="btn-time" id="btn-entrada-minute-up">+</button>
+                        <input type="text" id="entrada-minuto" value="00" maxlength="2" readonly>
+                        <button type="button" class="btn-time" id="btn-entrada-minute-down">-</button>
+                    </div>
+                </div>
 
                 <h2>Procedimentos</h2>
                 <textarea id="procedimentos" rows="5"></textarea>

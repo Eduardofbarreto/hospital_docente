@@ -29,12 +29,12 @@ switch ($method) {
             break;
         }
         
-        $sql = "INSERT INTO pacientes (nome, sobrenome, cpf, data_nascimento, endereco, procedimentos, medicacao) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO pacientes (nome, sobrenome, cpf, data_nascimento, endereco, data_entrada, horario_entrada, procedimentos, medicacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         
         $medicacaoJson = json_encode($data['medicacao'] ?? []);
         
-        $stmt->bind_param("sssssss", $data['nome'], $data['sobrenome'], $data['cpf'], $data['data_nascimento'], $data['endereco'], $data['procedimentos'], $medicacaoJson);
+        $stmt->bind_param("sssssssss", $data['nome'], $data['sobrenome'], $data['cpf'], $data['data_nascimento'], $data['endereco'], $data['data_entrada'], $data['horario_entrada'], $data['procedimentos'], $medicacaoJson);
         
         if ($stmt->execute()) {
             echo json_encode(["message" => "Paciente cadastrado com sucesso!", "id" => $conn->insert_id]);
@@ -54,7 +54,6 @@ switch ($method) {
             $paciente = $result->fetch_assoc();
             
             if ($paciente) {
-                // Adiciona o histórico de internações
                 $sql_historico = "SELECT * FROM historico_internacoes WHERE paciente_id = ? ORDER BY data_saida DESC";
                 $stmt_historico = $conn->prepare($sql_historico);
                 $stmt_historico->bind_param("i", $_GET['id']);
@@ -66,7 +65,6 @@ switch ($method) {
                     $paciente['historico'][] = $row;
                 }
                 
-                // Decodifica os dados da internação ativa
                 $paciente['medicacao'] = json_decode($paciente['medicacao'], true) ?? [];
                 
                 echo json_encode($paciente);
@@ -96,12 +94,12 @@ switch ($method) {
         }
         $id = $data['id'];
         
-        $sql = "UPDATE pacientes SET nome=?, sobrenome=?, cpf=?, data_nascimento=?, endereco=?, procedimentos=?, medicacao=? WHERE id=?";
+        $sql = "UPDATE pacientes SET nome=?, sobrenome=?, cpf=?, data_nascimento=?, endereco=?, data_entrada=?, horario_entrada=?, procedimentos=?, medicacao=? WHERE id=?";
         $stmt = $conn->prepare($sql);
         
         $medicacaoJson = json_encode($data['medicacao'] ?? []);
 
-        $stmt->bind_param("sssssssi", $data['nome'], $data['sobrenome'], $data['cpf'], $data['data_nascimento'], $data['endereco'], $data['procedimentos'], $medicacaoJson, $id);
+        $stmt->bind_param("sssssssssi", $data['nome'], $data['sobrenome'], $data['cpf'], $data['data_nascimento'], $data['endereco'], $data['data_entrada'], $data['horario_entrada'], $data['procedimentos'], $medicacaoJson, $id);
         
         if ($stmt->execute()) {
             echo json_encode(["message" => "Paciente atualizado com sucesso!"]);
@@ -130,28 +128,26 @@ switch ($method) {
         break;
 
     case 'PATCH':
-        // Lógica para dar alta ao paciente e salvar o histórico
         $data = json_decode(file_get_contents("php://input"), true);
         if (!isset($data['paciente_id'])) {
             echo json_encode(["error" => "ID do paciente não fornecido para a alta."]);
             break;
         }
 
-        // 1. Salva a internação atual no histórico
-        $sql_historico = "INSERT INTO historico_internacoes (paciente_id, data_entrada, data_saida, horario_saida, procedimentos, medicacao) VALUES (?, ?, ?, ?, ?, ?)";
+        $sql_historico = "INSERT INTO historico_internacoes (paciente_id, data_entrada, horario_entrada, data_saida, horario_saida, procedimentos, medicacao) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt_historico = $conn->prepare($sql_historico);
 
         $procedimentos_historico = $data['procedimentos'];
         $medicacao_historico = json_encode($data['medicacao']);
         $data_entrada = $data['data_entrada'];
+        $horario_entrada = $data['horario_entrada'];
         $data_saida = $data['data_saida'];
         $horario_saida = $data['horario_saida'];
 
-        $stmt_historico->bind_param("isssss", $data['paciente_id'], $data_entrada, $data_saida, $horario_saida, $procedimentos_historico, $medicacao_historico);
+        $stmt_historico->bind_param("issssss", $data['paciente_id'], $data_entrada, $horario_entrada, $data_saida, $horario_saida, $procedimentos_historico, $medicacao_historico);
 
         if ($stmt_historico->execute()) {
-            // 2. Limpa os dados de internação atual na tabela de pacientes
-            $sql_limpa = "UPDATE pacientes SET procedimentos = '', medicacao = '[]' WHERE id = ?";
+            $sql_limpa = "UPDATE pacientes SET data_entrada = NULL, horario_entrada = NULL, procedimentos = '', medicacao = '[]' WHERE id = ?";
             $stmt_limpa = $conn->prepare($sql_limpa);
             $stmt_limpa->bind_param("i", $data['paciente_id']);
             $stmt_limpa->execute();

@@ -3,6 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const formPaciente = document.getElementById('form-paciente');
     const inputId = document.getElementById('paciente-id');
     const inputDataEntrada = document.getElementById('data-entrada');
+    const inputEntradaHora = document.getElementById('entrada-hora');
+    const inputEntradaMinuto = document.getElementById('entrada-minuto');
+    const btnEntradaHourUp = document.getElementById('btn-entrada-hour-up');
+    const btnEntradaHourDown = document.getElementById('btn-entrada-hour-down');
+    const btnEntradaMinuteUp = document.getElementById('btn-entrada-minute-up');
+    const btnEntradaMinuteDown = document.getElementById('btn-entrada-minute-down');
+
     const btnSalvar = document.getElementById('btn-salvar');
     const btnLimpar = document.getElementById('btn-limpar');
     const listaPacientes = document.getElementById('lista-pacientes');
@@ -22,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const listaMedicamentos = document.getElementById('lista-medicamentos');
     const checkboxSN = document.getElementById('sn-checkbox');
 
-    // NOVO: Referências para a seção de alta
     const altaSection = document.getElementById('alta-section');
     const inputDataAlta = document.getElementById('data-alta');
     const inputAltaHora = document.getElementById('alta-hora');
@@ -35,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let todosPacientes = [];
 
-    // Funções do Modo Escuro
     function aplicarTema(isDark) {
         document.body.classList.toggle('dark-mode', isDark);
         toggleDarkModeBtn.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
@@ -54,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     carregarPreferenciaDeTema();
 
-    // Funções de Notificação
     function mostrarNotificacao(mensagem, tipo) {
         const notification = document.createElement('div');
         notification.classList.add('notification', tipo);
@@ -65,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // Lógica de controle de hora e minuto (geral)
     function formatTime(value) {
         return value.toString().padStart(2, '0');
     }
@@ -95,8 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupTimeControls(inputRemedioHora, inputRemedioMinuto, btnHourUp, btnHourDown, btnMinuteUp, btnMinuteDown);
     setupTimeControls(inputAltaHora, inputAltaMinuto, btnAltaHourUp, btnAltaHourDown, btnAltaMinuteUp, btnAltaMinuteDown);
+    setupTimeControls(inputEntradaHora, inputEntradaMinuto, btnEntradaHourUp, btnEntradaHourDown, btnEntradaMinuteUp, btnEntradaMinuteDown);
 
-    // Funções de Medicação
     remedioSelect.addEventListener('change', () => {
         inputRemedioPersonalizado.style.display = remedioSelect.value === 'outro' ? 'inline-block' : 'none';
         if (remedioSelect.value !== 'outro') {
@@ -171,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Funções de CRUD (API)
     async function fetchPacientes() {
         try {
             const response = await fetch(apiBaseUrl);
@@ -226,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // NOVO: Função para dar alta ao paciente
     async function darAltaPaciente(paciente) {
         try {
             const response = await fetch(apiBaseUrl, {
@@ -248,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Funções de Interação com a UI
     function renderizarPacientes(pacientes) {
         listaPacientes.innerHTML = '';
         if (Array.isArray(pacientes)) {
@@ -276,18 +276,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Preencher Formulário (MODIFICADO) ---
     function preencherFormulario(paciente) {
         inputId.value = paciente.id;
-        inputDataEntrada.value = paciente.data_nascimento; // Reutilizando a data de nascimento como data de entrada
         document.getElementById('nome').value = paciente.nome;
         document.getElementById('sobrenome').value = paciente.sobrenome;
         document.getElementById('cpf').value = paciente.cpf;
         document.getElementById('data-nascimento').value = paciente.data_nascimento;
         document.getElementById('endereco').value = paciente.endereco;
+        
+        // CORREÇÃO: Puxa os dados da internação atual do paciente
+        inputDataEntrada.value = paciente.data_entrada || '';
+        if (paciente.horario_entrada) {
+            const [hora, minuto] = paciente.horario_entrada.split(':');
+            inputEntradaHora.value = hora;
+            inputEntradaMinuto.value = minuto;
+        } else {
+            inputEntradaHora.value = '00';
+            inputEntradaMinuto.value = '00';
+        }
+
         document.getElementById('procedimentos').value = paciente.procedimentos;
         
-        // Medicação
         listaMedicamentos.innerHTML = '';
         if (Array.isArray(paciente.medicacao)) {
             paciente.medicacao.forEach(item => {
@@ -299,11 +308,12 @@ document.addEventListener('DOMContentLoaded', () => {
         altaSection.style.display = 'block';
     }
 
-    // --- Limpar Formulário (MODIFICADO) ---
     function limparFormulario() {
         formPaciente.reset();
         inputId.value = '';
         inputDataEntrada.value = '';
+        inputEntradaHora.value = '00';
+        inputEntradaMinuto.value = '00';
         listaMedicamentos.innerHTML = '';
         remedioSelect.value = '';
         inputRemedioPersonalizado.value = '';
@@ -318,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
         inputAltaMinuto.value = '00';
     }
 
-    // --- Eventos (MODIFICADO) ---
     formPaciente.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -329,6 +338,8 @@ document.addEventListener('DOMContentLoaded', () => {
             cpf: document.getElementById('cpf').value,
             data_nascimento: document.getElementById('data-nascimento').value,
             endereco: document.getElementById('endereco').value,
+            data_entrada: inputDataEntrada.value,
+            horario_entrada: `${inputEntradaHora.value}:${inputEntradaMinuto.value}`,
             procedimentos: document.getElementById('procedimentos').value,
             medicacao: Array.from(listaMedicamentos.querySelectorAll('.medication-item')).map(li => {
                 const textContent = li.querySelector('span').textContent;
@@ -345,7 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
         salvarPaciente(paciente);
     });
 
-    // NOVO: Evento para o botão de Dar Alta
     btnDarAlta.addEventListener('click', () => {
         if (!inputId.value) {
             mostrarNotificacao("Selecione um paciente para dar alta.", 'error');
@@ -355,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const altaData = {
             paciente_id: inputId.value,
             data_entrada: inputDataEntrada.value,
+            horario_entrada: `${inputEntradaHora.value}:${inputEntradaMinuto.value}`,
             data_saida: inputDataAlta.value,
             horario_saida: `${inputAltaHora.value}:${inputAltaMinuto.value}`,
             procedimentos: document.getElementById('procedimentos').value,

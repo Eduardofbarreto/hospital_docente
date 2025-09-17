@@ -1,7 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     const apiBaseUrl = 'http://localhost/proj/src/php/api.php';
-    const notificationContainer = document.getElementById('notification-container');
+    const params = new URLSearchParams(window.location.search);
+    const pacienteId = params.get('id');
+
     const toggleDarkModeBtn = document.getElementById('toggle-dark-mode');
+    const notificationContainer = document.getElementById('notification-container');
+    const pacienteDetalhesDiv = document.getElementById('paciente-detalhes');
+    const nomePacienteTitle = document.getElementById('nome-paciente-title');
+    
+    // NOVO: Referência para a lista de histórico
+    const historicoLista = document.getElementById('historico-lista');
 
     // Funções do Modo Escuro
     function aplicarTema(isDark) {
@@ -33,13 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // Função para buscar e exibir os dados do paciente
+    // Função para buscar e renderizar os detalhes do paciente
     async function fetchPaciente() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const pacienteId = urlParams.get('id');
-
         if (!pacienteId) {
-            mostrarNotificacao('ID do paciente não fornecido.', 'error');
+            pacienteDetalhesDiv.innerHTML = '<p>Paciente não encontrado.</p>';
             return;
         }
 
@@ -47,51 +52,83 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${apiBaseUrl}?id=${pacienteId}`);
             const paciente = await response.json();
 
-            if (paciente.error) {
-                mostrarNotificacao(paciente.error, 'error');
+            if (paciente && !paciente.error) {
+                renderizarPaciente(paciente);
             } else {
-                displayPacienteData(paciente);
+                pacienteDetalhesDiv.innerHTML = '<p>Paciente não encontrado.</p>';
+                mostrarNotificacao('Paciente não encontrado.', 'error');
             }
         } catch (error) {
-            console.error('Erro ao buscar dados do paciente:', error);
-            mostrarNotificacao('Erro ao carregar dados do paciente.', 'error');
+            console.error('Erro ao buscar detalhes do paciente:', error);
+            mostrarNotificacao('Erro de conexão ou servidor.', 'error');
         }
     }
 
-    // Função para formatar a data
-    function formatarData(data) {
-        if (!data) return 'Não informada';
-        const [ano, mes, dia] = data.split('-');
-        return `${dia}/${mes}/${ano}`;
+    // Função para renderizar os detalhes do paciente na tela
+    function renderizarPaciente(paciente) {
+        nomePacienteTitle.textContent = `${paciente.nome} ${paciente.sobrenome}`;
+        
+        const medicacaoHtml = paciente.medicacao.length > 0
+            ? paciente.medicacao.map(med => `<li>${med.nome_remedio} - ${med.horario} ${med.sn ? '(SN)' : ''}</li>`).join('')
+            : 'Nenhuma medicação registrada.';
+            
+        pacienteDetalhesDiv.innerHTML = `
+            <p><strong>CPF:</strong> ${paciente.cpf}</p>
+            <p><strong>Data de Nascimento:</strong> ${paciente.data_nascimento || 'Não informada'}</p>
+            <p><strong>Endereço:</strong> ${paciente.endereco || 'Não informado'}</p>
+            <p><strong>Procedimentos:</strong> ${paciente.procedimentos || 'Nenhum procedimento registrado'}</p>
+            <h3>Medicação</h3>
+            <ul class="medication-list-display">${medicacaoHtml}</ul>
+        `;
     }
 
-    // Função para exibir os dados na tela (MODIFICADA)
-    function displayPacienteData(paciente) {
-        document.getElementById('paciente-nome').textContent = `${paciente.nome} ${paciente.sobrenome}`;
-        document.getElementById('paciente-cpf').textContent = paciente.cpf;
-        document.getElementById('paciente-nascimento').textContent = formatarData(paciente.data_nascimento);
-        document.getElementById('paciente-endereco').textContent = paciente.endereco;
-        document.getElementById('paciente-procedimentos').textContent = paciente.procedimentos;
+    // NOVO: Função para buscar e renderizar o histórico de internações
+    async function fetchHistoricoInternacoes() {
+        if (!pacienteId) return;
 
-        // NOVOS CAMPOS
-        document.getElementById('data-baixa').textContent = paciente.data_baixa ? formatarData(paciente.data_baixa) : 'Não informada';
-        document.getElementById('horario-baixa').textContent = paciente.horario_baixa || 'Não informado';
+        try {
+            const response = await fetch(`${apiBaseUrl}?historico=true&id=${pacienteId}`);
+            const historico = await response.json();
 
-        // Medicação
-        const listaMedicamentos = document.getElementById('lista-medicamentos');
-        listaMedicamentos.innerHTML = '';
-        if (paciente.medicacao && paciente.medicacao.length > 0) {
-            paciente.medicacao.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.nome_remedio} - ${item.horario}`;
-                listaMedicamentos.appendChild(li);
-            });
-        } else {
-            const li = document.createElement('li');
-            li.textContent = 'Nenhuma medicação registrada.';
-            listaMedicamentos.appendChild(li);
+            if (historico && Array.isArray(historico)) {
+                renderizarHistorico(historico);
+            } else {
+                historicoLista.innerHTML = '<p>Nenhum histórico de internações encontrado.</p>';
+            }
+        } catch (error) {
+            console.error('Erro ao buscar histórico de internações:', error);
+            historicoLista.innerHTML = '<p>Erro ao carregar o histórico.</p>';
         }
     }
 
+    // NOVO: Função para renderizar o histórico na tela
+    function renderizarHistorico(historico) {
+        historicoLista.innerHTML = '';
+        if (historico.length === 0) {
+            historicoLista.innerHTML = '<p>Nenhum histórico de internações encontrado.</p>';
+            return;
+        }
+
+        historico.forEach(internacao => {
+            const internacaoItem = document.createElement('li');
+            internacaoItem.classList.add('historico-item');
+
+            const medicacaoHistoricoHtml = internacao.medicacao.length > 0
+                ? internacao.medicacao.map(med => `<li>${med.nome_remedio} - ${med.horario} ${med.sn ? '(SN)' : ''}</li>`).join('')
+                : 'Nenhuma medicação registrada.';
+
+            internacaoItem.innerHTML = `
+                <h4>Internação de ${internacao.data_entrada} a ${internacao.data_saida}</h4>
+                <p><strong>Hora da Alta:</strong> ${internacao.horario_saida}</p>
+                <p><strong>Procedimentos:</strong> ${internacao.procedimentos || 'Nenhum'}</p>
+                <h5>Medicação</h5>
+                <ul class="medication-list-display">${medicacaoHistoricoHtml}</ul>
+            `;
+            historicoLista.appendChild(internacaoItem);
+        });
+    }
+
+    // Executa as funções ao carregar a página
     fetchPaciente();
+    fetchHistoricoInternacoes();
 });

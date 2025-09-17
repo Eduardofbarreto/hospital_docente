@@ -73,32 +73,45 @@ document.addEventListener('DOMContentLoaded', () => {
         return value.toString().padStart(2, '0');
     }
 
-    function setupTimeControls(hourInput, minuteInput, hourUp, hourDown, minuteUp, minuteDown) {
-        hourUp.addEventListener('click', () => {
-            let hour = parseInt(hourInput.value);
-            hour = (hour + 1) % 24;
-            hourInput.value = formatTime(hour);
-        });
-        hourDown.addEventListener('click', () => {
-            let hour = parseInt(hourInput.value);
-            hour = (hour - 1 + 24) % 24;
-            hourInput.value = formatTime(hour);
-        });
-        minuteUp.addEventListener('click', () => {
-            let minute = parseInt(minuteInput.value);
-            minute = (minute + 1) % 60;
-            minuteInput.value = formatTime(minute);
-        });
-        minuteDown.addEventListener('click', () => {
-            let minute = parseInt(minuteInput.value);
-            minute = (minute - 1 + 60) % 60;
-            minuteInput.value = formatTime(minute);
-        });
+    function setupContinuousTimeControls(input, upBtn, downBtn, maxVal) {
+        let intervalId = null;
+        let timeoutId = null;
+
+        const changeValue = (amount) => {
+            let value = parseInt(input.value);
+            value = (value + amount) % (maxVal + 1);
+            if (value < 0) value = maxVal;
+            input.value = formatTime(value);
+        };
+
+        const startChanging = (amount) => {
+            changeValue(amount);
+            timeoutId = setTimeout(() => {
+                intervalId = setInterval(() => changeValue(amount), 100);
+            }, 500);
+        };
+
+        const stopChanging = () => {
+            clearTimeout(timeoutId);
+            clearInterval(intervalId);
+        };
+
+        upBtn.addEventListener('mousedown', () => startChanging(1));
+        downBtn.addEventListener('mousedown', () => startChanging(-1));
+        
+        upBtn.addEventListener('mouseup', stopChanging);
+        downBtn.addEventListener('mouseup', stopChanging);
+
+        upBtn.addEventListener('mouseleave', stopChanging);
+        downBtn.addEventListener('mouseleave', stopChanging);
     }
 
-    setupTimeControls(inputRemedioHora, inputRemedioMinuto, btnHourUp, btnHourDown, btnMinuteUp, btnMinuteDown);
-    setupTimeControls(inputAltaHora, inputAltaMinuto, btnAltaHourUp, btnAltaHourDown, btnAltaMinuteUp, btnAltaMinuteDown);
-    setupTimeControls(inputEntradaHora, inputEntradaMinuto, btnEntradaHourUp, btnEntradaHourDown, btnEntradaMinuteUp, btnEntradaMinuteDown);
+    setupContinuousTimeControls(inputRemedioHora, btnHourUp, btnHourDown, 23);
+    setupContinuousTimeControls(inputRemedioMinuto, btnMinuteUp, btnMinuteDown, 59);
+    setupContinuousTimeControls(inputEntradaHora, btnEntradaHourUp, btnEntradaHourDown, 23);
+    setupContinuousTimeControls(inputEntradaMinuto, btnEntradaMinuteUp, btnEntradaMinuteDown, 59);
+    setupContinuousTimeControls(inputAltaHora, btnAltaHourUp, btnAltaHourDown, 23);
+    setupContinuousTimeControls(inputAltaMinuto, btnAltaMinuteUp, btnAltaMinuteDown, 59);
 
     remedioSelect.addEventListener('change', () => {
         inputRemedioPersonalizado.style.display = remedioSelect.value === 'outro' ? 'inline-block' : 'none';
@@ -284,7 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('data-nascimento').value = paciente.data_nascimento;
         document.getElementById('endereco').value = paciente.endereco;
         
-        // CORREÇÃO: Puxa os dados da internação atual do paciente
         inputDataEntrada.value = paciente.data_entrada || '';
         if (paciente.horario_entrada) {
             const [hora, minuto] = paciente.horario_entrada.split(':');

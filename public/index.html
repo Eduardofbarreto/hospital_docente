@@ -34,15 +34,15 @@
                 <input type="date" id="data-entrada">
                 <label for="horario-entrada">Horário de Entrada:</label>
                 <div class="time-input-group">
-                    <div class="time-part">
+                    <input type="text" id="entrada-hora" value="00" maxlength="2" readonly>
+                    <div class="time-part-horizontal">
                         <button type="button" class="btn-time" id="btn-entrada-hour-up">+</button>
-                        <input type="text" id="entrada-hora" value="00" maxlength="2" readonly>
                         <button type="button" class="btn-time" id="btn-entrada-hour-down">-</button>
                     </div>
                     <span>:</span>
-                    <div class="time-part">
+                    <input type="text" id="entrada-minuto" value="00" maxlength="2" readonly>
+                    <div class="time-part-horizontal">
                         <button type="button" class="btn-time" id="btn-entrada-minute-up">+</button>
-                        <input type="text" id="entrada-minuto" value="00" maxlength="2" readonly>
                         <button type="button" class="btn-time" id="btn-entrada-minute-down">-</button>
                     </div>
                 </div>
@@ -64,19 +64,21 @@
                         <option value="outro">Outro...</option>
                     </select>
                     <input type="text" id="remedio-nome-personalizado" placeholder="Digite o nome do remédio..." style="display: none;">
+                    
                     <div class="time-input-group">
-                        <div class="time-part">
+                        <input type="text" id="remedio-hora" value="00" maxlength="2" readonly>
+                        <div class="time-part-horizontal">
                             <button type="button" class="btn-time" id="btn-hour-up">+</button>
-                            <input type="text" id="remedio-hora" value="00" maxlength="2" readonly>
                             <button type="button" class="btn-time" id="btn-hour-down">-</button>
                         </div>
                         <span>:</span>
-                        <div class="time-part">
+                        <input type="text" id="remedio-minuto" value="00" maxlength="2" readonly>
+                        <div class="time-part-horizontal">
                             <button type="button" class="btn-time" id="btn-minute-up">+</button>
-                            <input type="text" id="remedio-minuto" value="00" maxlength="2" readonly>
                             <button type="button" class="btn-time" id="btn-minute-down">-</button>
                         </div>
                     </div>
+                    
                     <button type="button" id="btn-adicionar-remedio" class="btn-icon">Adicionar</button>
                     <div class="sn-check-group">
                         <input type="checkbox" id="sn-checkbox">
@@ -97,15 +99,15 @@
                 <input type="date" id="data-alta">
                 <label for="horario-alta">Horário da Alta:</label>
                 <div class="time-input-group">
-                    <div class="time-part">
+                    <input type="text" id="alta-hora" value="00" maxlength="2" readonly>
+                    <div class="time-part-horizontal">
                         <button type="button" class="btn-time" id="btn-alta-hour-up">+</button>
-                        <input type="text" id="alta-hora" value="00" maxlength="2" readonly>
                         <button type="button" class="btn-time" id="btn-alta-hour-down">-</button>
                     </div>
                     <span>:</span>
-                    <div class="time-part">
+                    <input type="text" id="alta-minuto" value="00" maxlength="2" readonly>
+                    <div class="time-part-horizontal">
                         <button type="button" class="btn-time" id="btn-alta-minute-up">+</button>
-                        <input type="text" id="alta-minuto" value="00" maxlength="2" readonly>
                         <button type="button" class="btn-time" id="btn-alta-minute-down">-</button>
                     </div>
                 </div>

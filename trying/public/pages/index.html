@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prontuário Digital - Sistema de Saúde</title>
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --primary-light: #e8f0fe;
+            --secondary-color: #34a853;
+            --danger-color: #ea4335;
+            --warning-color: #fbbc04;
+            --text-color: #202124;
+            --text-light: #5f6368;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --border-color: #dadce0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-hover: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Lista de Pacientes */
+        .sidebar {
+            width: 300px;
+            background-color: var(--card-color);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            overflow-y: auto;
+            position: fixed;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .search-container {
+            padding: 15px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: var(--background-color);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .patient-list {
+            list-style: none;
+        }
+
+        .patient-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .patient-item:hover {
+            background-color: var(--primary-light);
+        }
+
+        .patient-item.active {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .patient-name {
+            font-weight: 500;
+        }
+
+        .patient-cpf {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Main Content - Formulário do Prontuário */
+        .main-content {
+            flex: 1;
+            margin-left: 300px;
+            padding: 20px;
+            max-width: calc(100% - 300px);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .patient-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .form-section {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-col {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .time-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .time-input {
+            flex: 1;
+        }
+
+        .time-btn {
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .time-btn:hover {
+            background-color: var(--border-color);
+        }
+
+        .medication-list {
+            margin-top: 10px;
+        }
+
+        .medication-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: var(--background-color);
+        }
+
+        .medication-name {
+            flex: 2;
+        }
+
+        .medication-dosage {
+            flex: 1;
+        }
+
+        .medication-sn {
+            flex: 0.5;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .add-medication {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .vitals-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .vital-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vital-input-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .history-section {
+            margin-top: 30px;
+        }
+
+        .history-item {
+            background-color: var(--background-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .history-date {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .history-procedure {
+            margin-bottom: 10px;
+        }
+
+        .history-medications {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-hover);
+            padding: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                max-width: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .vitals-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Ícones */
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: 'liga';
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar com lista de pacientes -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Prontuário Digital</h2>
+            </div>
+            <div class="search-container">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" class="search-input" placeholder="Pesquisar paciente...">
+            </div>
+            <ul class="patient-list">
+                <!-- Lista de pacientes será preenchida via JavaScript -->
+            </ul>
+        </div>
+
+        <!-- Conteúdo principal - Formulário do prontuário -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="patient-title">Novo Prontuário</h1>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="saveBtn">Salvar</button>
+                    <button class="btn btn-danger" id="deleteBtn" style="display: none;">Excluir</button>
+                </div>
+            </div>
+
+            <!-- Dados Pessoais -->
+            <div class="form-section">
+                <h2 class="section-title"><span class="material-icons">person</span> Dados Pessoais</h2>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="patientName">Nome Completo</label>
+                            <input type="text" id="patientName" placeholder="Digite o nome completo">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="patientBirth">Data de Nascimento</label>
+                            <input type="date" id="patientBirth">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="patientCPF">CPF</label>
+                            <input type="text" id="patientCPF" placeholder="000.000.000-00">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="patientAddress">Endereço</label>
+                            <input type="text" id="patientAddress" placeholder="Digite o endereço completo">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data e Hora da Baixa -->
+            <div class="form-section">
+                <h2 class="section-title"><span class="material-icons">schedule</span> Data e Hora da Baixa</h2>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="dischargeDate">Data da Baixa</label>
+                            <input type="date" id="dischargeDate">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="dischargeTime">Hora da Baixa</label>
+                            <div class="time-controls">
+                                <button class="time-btn" id="hourDown">-</button>
+                                <input type="text" id="dischargeTime" class="time-input" value="00:00" maxlength="5">
+                                <button class="time-btn" id="hourUp">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Procedimentos -->
+            <div class="form-section">
+                <h2 class="section-title"><span class="material-icons">medical_services</span> Procedimentos</h2>
+                <div class="form-group">
+                    <label for="procedure">Procedimento</label>
+                    <textarea id="procedure" rows="4" placeholder="Descreva os procedimentos realizados"></textarea>
+                </div>
+            </div>
+
+            <!-- Medicamentos -->
+            <div class="form-section">
+                <h2 class="section-title"><span class="material-icons">medication</span> Medicamentos</h2>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="medication">Medicamento</label>
+                            <select id="medication">
+                                <option value="">Selecione um medicamento</option>
+                                <option value="Paracetamol">Paracetamol</option>
+                                <option value="Dipirona">Dipirona</option>
+                                <option value="Ibuprofeno">Ibuprofeno</option>
+                                <option value="Omeprazol">Omeprazol</option>
+                                <option value="Amoxicilina">Amoxicilina</option>
+                                <option value="Azitromicina">Azitromicina</option>
+                                <option value="Losartana">Losartana</option>
+                                <option value="Atenolol">Atenolol</option>
+                                <option value="Sinvastatina">Sinvastatina</option>
+                                <option value="Metformina">Metformina</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="dosage">Dosagem</label>
+                            <input type="text" id="dosage" placeholder="Ex: 1mg, 500mg">
+                        </div>
+                    </div>
+                </div>
+                <div class="add-medication">
+                    <button class="btn btn-primary" id="addMedication">Adicionar Medicamento</button>
+                </div>
+                <div class="medication-list" id="medicationList">
+                    <!-- Lista de medicamentos será preenchida via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Sinais Vitais -->
+            <div class="form-section">
+                <h2 class="section-title"><span class="material-icons">favorite</span> Sinais Vitais</h2>
+                <div class="vitals-container">
+                    <div class="vital-item">
+                        <label for="bloodPressure">Pressão Arterial</label>
+                        <input type="text" id="bloodPressure" placeholder="Ex: 120/80">
+                    </div>
+                    <div class="vital-item">
+                        <label for="heartRate">Batimentos Cardíacos (bpm)</label>
+                        <input type="number" id="heartRate" placeholder="Ex: 72">
+                    </div>
+                    <div class="vital-item">
+                        <label for="glucose">Glicose (mg/dL)</label>
+                        <input type="number" id="glucose" placeholder="Ex: 95">
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top: 15px;">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="vitalDate">Data da Medição</label>
+                            <input type="date" id="vitalDate">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="vitalTime">Hora da Medição</label>
+                            <div class="time-controls">
+                                <button class="time-btn" id="vitalHourDown">-</button>
+                                <input type="text" id="vitalTime" class="time-input" value="00:00" maxlength="5">
+                                <button class="time-btn" id="vitalHourUp">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="measuredBy">Medido por</label>
+                            <input type="text" id="measuredBy" placeholder="Nome do enfermeiro(a)">
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-primary" id="addVital">Adicionar Sinais Vitais</button>
+                </div>
+                <div id="vitalsList" class="history-section">
+                    <!-- Lista de sinais vitais será preenchida via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Histórico de Internações -->
+            <div class="form-section history-section" id="historySection" style="display: none;">
+                <h2 class="section-title"><span class="material-icons">history</span> Histórico de Internações</h2>
+                <div id="patientHistory">
+                    <!-- Histórico será preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar medicamento personalizado -->
+    <div class="modal" id="customMedModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Adicionar Medicamento</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="customMedName">Nome do Medicamento</label>
+                <input type="text" id="customMedName" placeholder="Digite o nome do medicamento">
+            </div>
+            <div class="form-group">
+                <label for="customMedDosage">Dosagem</label>
+                <input type="text" id="customMedDosage" placeholder="Ex: 1mg, 500mg">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn" id="cancelCustomMed">Cancelar</button>
+                <button class="btn btn-primary" id="saveCustomMed">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados iniciais (simulando um banco de dados)
+        let patients = JSON.parse(localStorage.getItem('patients')) || [];
+        let currentPatientId = null;
+        let isEditing = false;
+
+        // Elementos DOM
+        const patientList = document.querySelector('.patient-list');
+        const searchInput = document.querySelector('.search-input');
+        const patientTitle = document.querySelector('.patient-title');
+        const saveBtn = document.getElementById('saveBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        
+        // Formulário
+        const patientName = document.getElementById('patientName');
+        const patientBirth = document.getElementById('patientBirth');
+        const patientCPF = document.getElementById('patientCPF');
+        const patientAddress = document.getElementById('patientAddress');
+        const dischargeDate = document.getElementById('dischargeDate');
+        const dischargeTime = document.getElementById('dischargeTime');
+        const procedure = document.getElementById('procedure');
+        const medication = document.getElementById('medication');
+        const dosage = document.getElementById('dosage');
+        const bloodPressure = document.getElementById('bloodPressure');
+        const heartRate = document.getElementById('heartRate');
+        const glucose = document.getElementById('glucose');
+        const vitalDate = document.getElementById('vitalDate');
+        const vitalTime = document.getElementById('vitalTime');
+        const measuredBy = document.getElementById('measuredBy');
+        
+        // Listas
+        const medicationList = document.getElementById('medicationList');
+        const vitalsList = document.getElementById('vitalsList');
+        const patientHistory = document.getElementById('patientHistory');
+        const historySection = document.getElementById('historySection');
+        
+        // Modais
+        const customMedModal = document.getElementById('customMedModal');
+        const customMedName = document.getElementById('customMedName');
+        const customMedDosage = document.getElementById('customMedDosage');
+        const cancelCustomMed = document.getElementById('cancelCustomMed');
+        const saveCustomMed = document.getElementById('saveCustomMed');
+        
+        // Controles de tempo
+        const hourUp = document.getElementById('hourUp');
+        const hourDown = document.getElementById('hourDown');
+        const vitalHourUp = document.getElementById('vitalHourUp');
+        const vitalHourDown = document.getElementById('vitalHourDown');
+        
+        // Botões de ação
+        const addMedication = document.getElementById('addMedication');
+        const addVital = document.getElementById('addVital');
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definir data atual como padrão
+            const today = new Date().toISOString().split('T')[0];
+            dischargeDate.value = today;
+            vitalDate.value = today;
+            
+            // Carregar lista de pacientes
+            renderPatientList();
+            
+            // Configurar eventos
+            setupEventListeners();
+        });
+
+        // Configurar eventos
+        function setupEventListeners() {
+            // Pesquisa de pacientes
+            searchInput.addEventListener('input', filterPatients);
+            
+            // Controles de tempo
+            hourUp.addEventListener('click', () => adjustTime(dischargeTime, 1, 0));
+            hourDown.addEventListener('click', () => adjustTime(dischargeTime, -1, 0));
+            vitalHourUp.addEventListener('click', () => adjustTime(vitalTime, 1, 0));
+            vitalHourDown.addEventListener('click', () => adjustTime(vitalTime, -1, 0));
+            
+            // Permitir digitação manual no campo de tempo
+            dischargeTime.addEventListener('input', validateTimeInput);
+            vitalTime.addEventListener('input', validateTimeInput);
+            
+            // Adicionar medicamento
+            addMedication.addEventListener('click', addMedicationToList);
+            
+            // Adicionar sinais vitais
+            addVital.addEventListener('click', addVitalSigns);
+            
+            // Salvar paciente
+            saveBtn.addEventListener('click', savePatient);
+            
+            // Excluir paciente
+            deleteBtn.addEventListener('click', deletePatient);
+            
+            // Modal de medicamento personalizado
+            medication.addEventListener('change', function() {
+                if (this.value === 'outro') {
+                    customMedModal.style.display = 'flex';
+                    customMedName.value = '';
+                    customMedDosage.value = '';
+                }
+            });
+            
+            cancelCustomMed.addEventListener('click', () => {
+                customMedModal.style.display = 'none';
+                medication.value = '';
+            });
+            
+            saveCustomMed.addEventListener('click', saveCustomMedication);
+            
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', function(event) {
+                if (event.target === customMedModal) {
+                    customMedModal.style.display = 'none';
+                    medication.value = '';
+                }
+            });
+            
+            // Fechar modal com ESC
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && customMedModal.style.display === 'flex') {
+                    customMedModal.style.display = 'none';
+                    medication.value = '';
+                }
+            });
+        }
+
+        // Ajustar hora
+        function adjustTime(timeInput, hours, minutes) {
+            let time = timeInput.value.split(':');
+            let h = parseInt(time[0]) + hours;
+            let m = parseInt(time[1]) + minutes;
+            
+            if (m >= 60) {
+                h += 1;
+                m = 0;
+            } else if (m < 0) {
+                h -= 1;
+                m = 59;
+            }
+            
+            if (h >= 24) h = 0;
+            if (h < 0) h = 23;
+            
+            timeInput.value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        }
+
+        // Validar entrada de tempo
+        function validateTimeInput(e) {
+            const input = e.target;
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 4) value = value.substring(0, 4);
+            
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + ':' + value.substring(2);
+            }
+            
+            input.value = value;
+        }
+
+        // Adicionar medicamento à lista
+        function addMedicationToList() {
+            const medValue = medication.value;
+            const dosageValue = dosage.value;
+            
+            if (!medValue || !dosageValue) {
+                alert('Por favor, selecione um medicamento e informe a dosagem.');
+                return;
+            }
+            
+            const medicationItem = document.createElement('div');
+            medicationItem.className = 'medication-item';
+            medicationItem.innerHTML = `
+                <div class="medication-name">${medValue}</div>
+                <div class="medication-dosage">${dosageValue}</div>
+                <div class="medication-sn">
+                    <input type="checkbox" id="sn-${Date.now()}">
+                    <label for="sn-${Date.now()}">SN</label>
+                </div>
+                <button class="btn btn-danger" onclick="this.parentElement.remove()">Remover</button>
+            `;
+            
+            medicationList.appendChild(medicationItem);
+            
+            // Limpar campos
+            medication.value = '';
+            dosage.value = '';
+        }
+
+        // Salvar medicamento personalizado
+        function saveCustomMedication() {
+            const name = customMedName.value.trim();
+            const dosageValue = customMedDosage.value.trim();
+            
+            if (!name || !dosageValue) {
+                alert('Por favor, preencha o nome e a dosagem do medicamento.');
+                return;
+            }
+            
+            const medicationItem = document.createElement('div');
+            medicationItem.className = 'medication-item';
+            medicationItem.innerHTML = `
+                <div class="medication-name">${name}</div>
+                <div class="medication-dosage">${dosageValue}</div>
+                <div class="medication-sn">
+                    <input type="checkbox" id="sn-${Date.now()}">
+                    <label for="sn-${Date.now()}">SN</label>
+                </div>
+                <button class="btn btn-danger" onclick="this.parentElement.remove()">Remover</button>
+            `;
+            
+            medicationList.appendChild(medicationItem);
+            customMedModal.style.display = 'none';
+            medication.value = '';
+            dosage.value = '';
+        }
+
+        // Adicionar sinais vitais
+        function addVitalSigns() {
+            const bp = bloodPressure.value;
+            const hr = heartRate.value;
+            const gl = glucose.value;
+            const date = vitalDate.value;
+            const time = vitalTime.value;
+            const by = measuredBy.value;
+            
+            if (!date || !time || !by) {
+                alert('Por favor, preencha a data, hora e quem mediu os sinais vitais.');
+                return;
+            }
+            
+            const vitalItem = document.createElement('div');
+            vitalItem.className = 'history-item';
+            vitalItem.innerHTML = `
+                <div class="history-date">${formatDate(date)} às ${time}</div>
+                <div><strong>Medido por:</strong> ${by}</div>
+                ${bp ? `<div><strong>Pressão Arterial:</strong> ${bp}</div>` : ''}
+                ${hr ? `<div><strong>Batimentos Cardíacos:</strong> ${hr} bpm</div>` : ''}
+                ${gl ? `<div><strong>Glicose:</strong> ${gl} mg/dL</div>` : ''}
+                <button class="btn btn-danger" onclick="this.parentElement.remove()" style="margin-top: 10px;">Remover</button>
+            `;
+            
+            vitalsList.appendChild(vitalItem);
+            
+            // Limpar campos (exceto data/hora)
+            bloodPressure.value = '';
+            heartRate.value = '';
+            glucose.value = '';
+            measuredBy.value = '';
+        }
+
+        // Salvar paciente
+        function savePatient() {
+            // Coletar dados do formulário
+            const patientData = {
+                id: currentPatientId || Date.now().toString(),
+                name: patientName.value.trim(),
+                birthDate: patientBirth.value,
+                cpf: patientCPF.value.trim(),
+                address: patientAddress.value.trim(),
+                discharge: {
+                    date: dischargeDate.value,
+                    time: dischargeTime.value
+                },
+                procedure: procedure.value.trim(),
+                medications: [],
+                vitalSigns: [],
+                createdAt: currentPatientId ? 
+                    patients.find(p => p.id === currentPatientId).createdAt : 
+                    new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Validar dados obrigatórios
+            if (!patientData.name || !patientData.birthDate || !patientData.cpf) {
+                alert('Por favor, preencha pelo menos o nome, data de nascimento e CPF do paciente.');
+                return;
+            }
+            
+            // Coletar medicamentos
+            const medItems = medicationList.querySelectorAll('.medication-item');
+            medItems.forEach(item => {
+                const name = item.querySelector('.medication-name').textContent;
+                const dosage = item.querySelector('.medication-dosage').textContent;
+                const sn = item.querySelector('input[type="checkbox"]').checked;
+                
+                patientData.medications.push({
+                    name,
+                    dosage,
+                    sn
+                });
+            });
+            
+            // Coletar sinais vitais
+            const vitalItems = vitalsList.querySelectorAll('.history-item');
+            vitalItems.forEach(item => {
+                const dateText = item.querySelector('.history-date').textContent;
+                const by = item.querySelector('div:nth-child(2)').textContent.replace('Medido por: ', '');
+                
+                // Extrair dados dos sinais vitais
+                let bp = '', hr = '', gl = '';
+                const divs = item.querySelectorAll('div');
+                
+                divs.forEach(div => {
+                    const text = div.textContent;
+                    if (text.includes('Pressão Arterial:')) {
+                        bp = text.replace('Pressão Arterial: ', '');
+                    } else if (text.includes('Batimentos Cardíacos:')) {
+                        hr = text.replace('Batimentos Cardíacos: ', '').replace(' bpm', '');
+                    } else if (text.includes('Glicose:')) {
+                        gl = text.replace('Glicose: ', '').replace(' mg/dL', '');
+                    }
+                });
+                
+                // Extrair data e hora do texto
+                const [datePart, timePart] = dateText.split(' às ');
+                
+                patientData.vitalSigns.push({
+                    date: parseDate(datePart),
+                    time: timePart,
+                    measuredBy: by,
+                    bloodPressure: bp,
+                    heartRate: hr,
+                    glucose: gl
+                });
+            });
+            
+            // Salvar no "banco de dados"
+            if (currentPatientId) {
+                // Atualizar paciente existente
+                const index = patients.findIndex(p => p.id === currentPatientId);
+                patients[index] = patientData;
+            } else {
+                // Adicionar novo paciente
+                patients.push(patientData);
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('patients', JSON.stringify(patients));
+            
+            // Atualizar a lista de pacientes
+            renderPatientList();
+            
+            // Limpar formulário
+            clearForm();
+            
+            alert('Paciente salvo com sucesso!');
+        }
+
+        // Excluir paciente
+        function deletePatient() {
+            if (!currentPatientId) return;
+            
+            if (confirm('Tem certeza que deseja excluir este paciente?')) {
+                patients = patients.filter(p => p.id !== currentPatientId);
+                localStorage.setItem('patients', JSON.stringify(patients));
+                renderPatientList();
+                clearForm();
+                alert('Paciente excluído com sucesso!');
+            }
+        }
+
+        // Limpar formulário
+        function clearForm() {
+            patientName.value = '';
+            patientBirth.value = '';
+            patientCPF.value = '';
+            patientAddress.value = '';
+            dischargeDate.value = new Date().toISOString().split('T')[0];
+            dischargeTime.value = '00:00';
+            procedure.value = '';
+            medication.value = '';
+            dosage.value = '';
+            bloodPressure.value = '';
+            heartRate.value = '';
+            glucose.value = '';
+            vitalDate.value = new Date().toISOString().split('T')[0];
+            vitalTime.value = '00:00';
+            measuredBy.value = '';
+            
+            medicationList.innerHTML = '';
+            vitalsList.innerHTML = '';
+            patientHistory.innerHTML = '';
+            
+            currentPatientId = null;
+            isEditing = false;
+            patientTitle.textContent = 'Novo Prontuário';
+            deleteBtn.style.display = 'none';
+            historySection.style.display = 'none';
+        }
+
+        // Renderizar lista de pacientes
+        function renderPatientList() {
+            patientList.innerHTML = '';
+            
+            // Ordenar pacientes por nome
+            const sortedPatients = [...patients].sort((a, b) => 
+                a.name.localeCompare(b.name)
+            );
+            
+            sortedPatients.forEach(patient => {
+                const li = document.createElement('li');
+                li.className = 'patient-item';
+                li.innerHTML = `
+                    <div>
+                        <div class="patient-name">${patient.name}</div>
+                        <div class="patient-cpf">${patient.cpf}</div>
+                    </div>
+                    <span class="material-icons">chevron_right</span>
+                `;
+                
+                li.addEventListener('click', () => loadPatient(patient.id));
+                patientList.appendChild(li);
+            });
+        }
+
+        // Carregar paciente para edição
+        function loadPatient(id) {
+            const patient = patients.find(p => p.id === id);
+            if (!patient) return;
+            
+            currentPatientId = id;
+            isEditing = true;
+            
+            // Preencher formulário
+            patientName.value = patient.name;
+            patientBirth.value = patient.birthDate;
+            patientCPF.value = patient.cpf;
+            patientAddress.value = patient.address;
+            dischargeDate.value = patient.discharge.date;
+            dischargeTime.value = patient.discharge.time;
+            procedure.value = patient.procedure || '';
+            
+            // Preencher medicamentos
+            medicationList.innerHTML = '';
+            patient.medications.forEach(med => {
+                const medicationItem = document.createElement('div');
+                medicationItem.className = 'medication-item';
+                medicationItem.innerHTML = `
+                    <div class="medication-name">${med.name}</div>
+                    <div class="medication-dosage">${med.dosage}</div>
+                    <div class="medication-sn">
+                        <input type="checkbox" id="sn-${Date.now()}" ${med.sn ? 'checked' : ''}>
+                        <label for="sn-${Date.now()}">SN</label>
+                    </div>
+                    <button class="btn btn-danger" onclick="this.parentElement.remove()">Remover</button>
+                `;
+                medicationList.appendChild(medicationItem);
+            });
+            
+            // Preencher sinais vitais
+            vitalsList.innerHTML = '';
+            patient.vitalSigns.forEach(vital => {
+                const vitalItem = document.createElement('div');
+                vitalItem.className = 'history-item';
+                vitalItem.innerHTML = `
+                    <div class="history-date">${formatDate(vital.date)} às ${vital.time}</div>
+                    <div><strong>Medido por:</strong> ${vital.measuredBy}</div>
+                    ${vital.bloodPressure ? `<div><strong>Pressão Arterial:</strong> ${vital.bloodPressure}</div>` : ''}
+                    ${vital.heartRate ? `<div><strong>Batimentos Cardíacos:</strong> ${vital.heartRate} bpm</div>` : ''}
+                    ${vital.glucose ? `<div><strong>Glicose:</strong> ${vital.glucose} mg/dL</div>` : ''}
+                    <button class="btn btn-danger" onclick="this.parentElement.remove()" style="margin-top: 10px;">Remover</button>
+                `;
+                vitalsList.appendChild(vitalItem);
+            });
+            
+            // Atualizar interface
+            patientTitle.textContent = patient.name;
+            deleteBtn.style.display = 'block';
+            
+            // Mostrar histórico se houver mais de uma entrada
+            showPatientHistory(patient);
+        }
+
+        // Mostrar histórico do paciente
+        function showPatientHistory(patient) {
+            patientHistory.innerHTML = '';
+            
+            // Encontrar todas as entradas deste paciente (por CPF)
+            const patientEntries = patients.filter(p => p.cpf === patient.cpf);
+            
+            if (patientEntries.length > 1) {
+                historySection.style.display = 'block';
+                
+                patientEntries.forEach(entry => {
+                    if (entry.id !== patient.id) { // Não mostrar a entrada atual
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item';
+                        
+                        let proceduresHTML = '';
+                        if (entry.procedure) {
+                            proceduresHTML = `<div class="history-procedure"><strong>Procedimentos:</strong> ${entry.procedure}</div>`;
+                        }
+                        
+                        let medsHTML = '';
+                        if (entry.medications && entry.medications.length > 0) {
+                            medsHTML = `<div class="history-medications"><strong>Medicamentos:</strong> ${entry.medications.map(m => m.name).join(', ')}</div>`;
+                        }
+                        
+                        historyItem.innerHTML = `
+                            <div class="history-date">Internação: ${formatDate(entry.discharge.date)} - Alta: ${formatDate(entry.discharge.date)} às ${entry.discharge.time}</div>
+                            ${proceduresHTML}
+                            ${medsHTML}
+                        `;
+                        
+                        patientHistory.appendChild(historyItem);
+                    }
+                });
+            } else {
+                historySection.style.display = 'none';
+            }
+        }
+
+        // Filtrar pacientes
+        function filterPatients() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const patientItems = document.querySelectorAll('.patient-item');
+            
+            patientItems.forEach(item => {
+                const name = item.querySelector('.patient-name').textContent.toLowerCase();
+                const cpf = item.querySelector('.patient-cpf').textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || cpf.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Funções auxiliares
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+        
+        function parseDate(dateString) {
+            // Converte de "DD/MM/AAAA" para "AAAA-MM-DD"
+            const parts = dateString.split('/');
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+    </script>
+</body>
+</html>
